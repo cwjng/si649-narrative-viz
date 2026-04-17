@@ -6,7 +6,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
 NOTEBOOK_PATH = REPO_ROOT / "interactive_viz.ipynb"
-OUTPUT_HTML = REPO_ROOT / "interactive_viz.html"
+OUTPUT_HTML = REPO_ROOT / "index.html"
 DATA_DIR = REPO_ROOT / "interactive_viz_data"
 
 
