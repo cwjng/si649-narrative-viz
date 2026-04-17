@@ -4,6 +4,7 @@ import json
 import math
 import os
 from pathlib import Path
+from time import time
 
 REPO_ROOT = Path(__file__).resolve().parent
 NOTEBOOK_PATH = REPO_ROOT / "interactive_viz.ipynb"
@@ -56,6 +57,7 @@ def externalize_datasets(spec: dict[str, object]) -> tuple[dict[str, object], di
 def build_html(spec: dict[str, object], dataset_urls: dict[str, str]) -> str:
     spec_json = json.dumps(spec, separators=(",", ":"))
     dataset_urls_json = json.dumps(dataset_urls, separators=(",", ":"))
+    cache_bust = str(int(time()))
     return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -168,10 +170,11 @@ def build_html(spec: dict[str, object], dataset_urls: dict[str, str]) -> str:
   <script>
     const spec = {spec_json};
     const datasetUrls = {dataset_urls_json};
+    const cacheBust = "{cache_bust}";
 
     Promise.all(
       Object.entries(datasetUrls).map(([name, url]) =>
-        fetch(url)
+        fetch(`${{url}}?v=${{cacheBust}}`, {{ cache: "no-store" }})
           .then((response) => {{
             if (!response.ok) {{
               throw new Error(`Failed to load ${{url}}: ${{response.status}}`);
