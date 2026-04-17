@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 from pathlib import Path
 
@@ -26,14 +27,25 @@ def remove_stale_data_files() -> None:
         path.unlink()
 
 
+def sanitize_json_value(node: object) -> object:
+    if isinstance(node, dict):
+        return {key: sanitize_json_value(value) for key, value in node.items()}
+    if isinstance(node, list):
+        return [sanitize_json_value(value) for value in node]
+    if isinstance(node, float) and not math.isfinite(node):
+        return None
+    return node
+
+
 def externalize_datasets(spec: dict[str, object]) -> tuple[dict[str, object], dict[str, str]]:
     datasets = spec.pop("datasets", {})
     dataset_urls: dict[str, str] = {}
 
     for dataset_name, dataset_rows in datasets.items():
         dataset_path = DATA_DIR / f"{dataset_name}.json"
+        cleaned_rows = sanitize_json_value(dataset_rows)
         dataset_path.write_text(
-            json.dumps(dataset_rows, separators=(",", ":")),
+            json.dumps(cleaned_rows, separators=(",", ":"), allow_nan=False),
             encoding="utf-8",
         )
         dataset_urls[dataset_name] = f"{DATA_DIR.name}/{dataset_path.name}"
