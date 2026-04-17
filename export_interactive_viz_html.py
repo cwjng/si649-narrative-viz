@@ -26,25 +26,7 @@ def remove_stale_data_files() -> None:
         path.unlink()
 
 
-def rewrite_data_refs(node: object, dataset_urls: dict[str, str]) -> None:
-    if isinstance(node, dict):
-        data = node.get("data")
-        if isinstance(data, dict):
-            dataset_name = data.get("name")
-            if dataset_name in dataset_urls:
-                node["data"] = {
-                    "url": dataset_urls[dataset_name],
-                    "format": {"type": "json"},
-                }
-
-        for value in node.values():
-            rewrite_data_refs(value, dataset_urls)
-    elif isinstance(node, list):
-        for item in node:
-            rewrite_data_refs(item, dataset_urls)
-
-
-def externalize_datasets(spec: dict[str, object]) -> dict[str, object]:
+def externalize_datasets(spec: dict[str, object]) -> tuple[dict[str, object], dict[str, str]]:
     datasets = spec.pop("datasets", {})
     dataset_urls: dict[str, str] = {}
 
@@ -56,12 +38,12 @@ def externalize_datasets(spec: dict[str, object]) -> dict[str, object]:
         )
         dataset_urls[dataset_name] = f"{DATA_DIR.name}/{dataset_path.name}"
 
-    rewrite_data_refs(spec, dataset_urls)
-    return spec
+    return spec, dataset_urls
 
 
-def build_html(spec: dict[str, object]) -> str:
+def build_html(spec: dict[str, object], dataset_urls: dict[str, str]) -> str:
     spec_json = json.dumps(spec, separators=(",", ":"))
+    dataset_urls_json = json.dumps(dataset_urls, separators=(",", ":"))
     return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -173,7 +155,28 @@ def build_html(spec: dict[str, object]) -> str:
   </main>
   <script>
     const spec = {spec_json};
-    vegaEmbed("#vis", spec, {{ mode: "vega-lite", actions: false }});
+    const datasetUrls = {dataset_urls_json};
+
+    Promise.all(
+      Object.entries(datasetUrls).map(([name, url]) =>
+        fetch(url)
+          .then((response) => {{
+            if (!response.ok) {{
+              throw new Error(`Failed to load ${{url}}: ${{response.status}}`);
+            }}
+            return response.json();
+          }})
+          .then((data) => [name, data])
+      )
+    )
+      .then((entries) => {{
+        spec.datasets = Object.fromEntries(entries);
+        return vegaEmbed("#vis", spec, {{ mode: "vega-lite", actions: false }});
+      }})
+      .catch((error) => {{
+        document.getElementById("vis").innerHTML = `<pre>${{error.message}}</pre>`;
+        throw error;
+      }});
   </script>
 </body>
 </html>
@@ -192,8 +195,8 @@ def main() -> None:
     if dashboard is None:
         raise RuntimeError("The notebook did not define a `dashboard` chart.")
 
-    spec = externalize_datasets(dashboard.to_dict())
-    OUTPUT_HTML.write_text(build_html(spec), encoding="utf-8")
+    spec, dataset_urls = externalize_datasets(dashboard.to_dict())
+    OUTPUT_HTML.write_text(build_html(spec, dataset_urls), encoding="utf-8")
 
 
 if __name__ == "__main__":
