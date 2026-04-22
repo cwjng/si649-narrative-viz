@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Applicant Journey — Cluster Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f5ef;
+    --surface: #fffdf8;
+    --surface2: #f0ede6;
+    --border: #d8d2c6;
+    --border2: #c5bfb4;
+    --text: #1f2933;
+    --muted: #4b5b68;
+    --muted2: #8a98a4;
+    /* Okabe-Ito colorblind-safe palette */
+    --c0: #E69F00;
+    --c1: #0072B2;
+    --c2: #009E73;
+    --c3: #D55E00;
+    --c0-dim: rgba(230,159,0,0.10);
+    --c1-dim: rgba(0,114,178,0.10);
+    --c2-dim: rgba(0,158,115,0.10);
+    --c3-dim: rgba(213,94,0,0.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    padding: 24px 48px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    background: var(--surface);
+  }
+  header h1 { font-size: 2rem; font-weight: normal; line-height: 1.1; margin: 0 0 4px; }
+  .header-sub { font-size: 1rem; color: var(--muted); margin: 0; }
+  .header-meta { font-size: 0.85rem; color: var(--muted); text-align: right; padding-bottom: 2px; }
+  .header-meta span { color: var(--text); font-weight: bold; }
+
+  /* BREADCRUMB */
+  #breadcrumb {
+    padding: 10px 48px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.83rem; color: var(--muted);
+    background: var(--bg);
+  }
+  .crumb { cursor: pointer; transition: color 0.15s; }
+  .crumb:hover { color: var(--text); text-decoration: underline; }
+  .sep { opacity: 0.4; }
+  .current { color: var(--text); }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+  #overview { display: none; grid-template-columns: 1fr 1fr; height: calc(100vh - 112px); }
+  #overview.active { display: grid; }
+
+  /* PCA PANEL */
+  #pca-panel {
+    padding: 24px 32px;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 12px;
+    overflow: hidden;
+  }
+  .panel-label {
+    font-size: 0.72rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  #pca-svg { width: 100%; flex: 1; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* CARDS PANEL */
+  #cards-panel {
+    padding: 24px 32px;
+    display: flex; flex-direction: column; gap: 10px;
+    overflow-y: auto; background: var(--bg);
+  }
+
+  /* CLUSTER CARD */
+  .cluster-card {
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px;
+    cursor: pointer; transition: all 0.18s ease;
+    position: relative; overflow: hidden;
+    background: var(--surface);
+  }
+  .cluster-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px; border-radius: 10px 0 0 10px;
+  }
+  .cluster-card[data-cluster="0"]::before { background: var(--c0); }
+  .cluster-card[data-cluster="1"]::before { background: var(--c1); }
+  .cluster-card[data-cluster="2"]::before { background: var(--c2); }
+  .cluster-card[data-cluster="3"]::before { background: var(--c3); }
+  .cluster-card.dimmed { opacity: 0.28; }
+  .cluster-card.highlighted { border-color: var(--border2); box-shadow: 0 2px 10px rgba(0,0,0,0.09); }
+  .cluster-card[data-cluster="0"].highlighted { background: var(--c0-dim); }
+  .cluster-card[data-cluster="1"].highlighted { background: var(--c1-dim); }
+  .cluster-card[data-cluster="2"].highlighted { background: var(--c2-dim); }
+  .cluster-card[data-cluster="3"].highlighted { background: var(--c3-dim); }
+  .cluster-card:hover:not(.dimmed) { box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .card-cluster-num { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); }
+  .card-n { font-size: 0.75rem; color: var(--muted); }
+  .card-n span { color: var(--text); font-weight: bold; }
+  .card-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
+  .cluster-card[data-cluster="0"] .card-title { color: #8a5800; }
+  .cluster-card[data-cluster="1"] .card-title { color: #00497a; }
+  .cluster-card[data-cluster="2"] .card-title { color: #006b4e; }
+  .cluster-card[data-cluster="3"] .card-title { color: #8a3b00; }
+  .card-desc { font-size: 0.79rem; color: var(--muted); line-height: 1.45; margin-bottom: 9px; }
+  .card-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+  .stat { display: flex; flex-direction: column; gap: 1px; }
+  .stat-label { font-size: 0.65rem; letter-spacing: 0.08em; color: var(--muted2); text-transform: uppercase; }
+  .stat-value { font-size: 0.92rem; font-weight: bold; }
+  .card-cta {
+    position: absolute; right: 14px; bottom: 12px;
+    font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted2); opacity: 0; transition: opacity 0.18s;
+  }
+  .cluster-card:hover .card-cta { opacity: 1; }
+
+  /* DETAIL */
+  #detail { display: none; padding: 32px 48px; max-width: 1060px; margin: 0 auto; }
+  #detail.active { display: block; }
+
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--muted); cursor: pointer;
+    border: 1px solid var(--border); padding: 5px 14px;
+    border-radius: 6px; transition: all 0.15s; margin-bottom: 24px;
+    background: var(--surface); font-family: Georgia, serif;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--border2); }
+
+  .detail-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 30px; }
+  .detail-cluster-badge {
+    width: 50px; height: 50px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, serif; font-size: 22px; font-weight: bold;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .detail-title-block h2 {
+    font-size: 1.9rem; font-weight: normal;
+    margin-bottom: 4px; font-family: Georgia, serif;
+  }
+  .detail-title-block .archetype { font-size: 0.88rem; color: var(--muted); font-style: italic; }
+
+  .section-label {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
+  }
+
+  /* FUNNEL */
+  #funnel-container {
+    display: flex; align-items: flex-end; gap: 2px;
+    margin-bottom: 34px; height: 185px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px 14px;
+  }
+  .funnel-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .funnel-pct { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; font-family: Georgia, serif; }
+  .funnel-bar-wrap { width: 100%; display: flex; align-items: flex-end; justify-content: center; height: 100px; }
+  .funnel-bar { width: 65%; border-radius: 3px 3px 0 0; }
+  .funnel-name { font-size: 0.63rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-top: 6px; text-align: center; }
+  .funnel-arrow { align-self: flex-end; color: var(--border2); font-size: 16px; padding-bottom: 50px; flex-shrink: 0; }
+
+  /* DETAIL GRID */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
+  .detail-chart-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+  }
+  .chart-title { font-size: 0.88rem; color: var(--text); margin-bottom: 2px; font-weight: bold; }
+  .chart-subtitle { font-size: 0.75rem; color: var(--muted); margin-bottom: 12px; }
+
+  /* METRICS */
+  .metrics-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+  .metric-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .metric-label { font-size: 0.65rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted2); margin-bottom: 4px; }
+  .metric-value { font-family: Georgia, serif; font-size: 1.6rem; font-weight: normal; }
+  .metric-sub { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+  /* TOOLTIP */
+  #tooltip {
+    position: fixed; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 12px; font-size: 0.8rem;
+    pointer-events: none; opacity: 0; transition: opacity 0.12s; z-index: 100;
+    color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-family: Georgia, serif;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Student Applicant Journey</h1>
+    <p class="header-sub">Cluster analysis of applicant journey archetypes.</p>
+  </div>
+  <div class="header-meta">
+    N = <span>227,641</span> applicants &nbsp;·&nbsp; k = <span>4</span> clusters &nbsp;·&nbsp; PCA = <span>2</span> components<br>
+    <span style="font-weight:normal;color:var(--muted)">Hover clusters to explore &nbsp;·&nbsp; Click a card to drill in</span>
+  </div>
+</header>
+
+<div id="breadcrumb">
+  <span class="crumb" onclick="showOverview()">Overview</span>
+  <span class="sep" id="bc-sep" style="display:none">›</span>
+  <span class="current" id="bc-cluster" style="display:none"></span>
+</div>
+
+<div id="tooltip"></div>
+
+<!-- OVERVIEW -->
+<div id="overview" class="view">
+  <div id="pca-panel">
+    <div class="panel-label">PCA Scatterplot &nbsp;·&nbsp; 200 sampled points per cluster</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#E69F00"></div>Cluster 0 — Disengaged</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0072B2"></div>Cluster 1 — Committed</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#009E73"></div>Cluster 2 — Early Planner</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#D55E00"></div>Cluster 3 — Ghost Acceptee</div>
+    </div>
+    <svg id="pca-svg"></svg>
+  </div>
+  <div id="cards-panel">
+    <div class="panel-label" style="margin-bottom:2px">Applicant Archetypes</div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div id="detail" class="view">
+  <div class="back-btn" onclick="showOverview()">← Back to Overview</div>
+  <div class="detail-header">
+    <div class="detail-cluster-badge" id="detail-badge">0</div>
+    <div class="detail-title-block">
+      <h2 id="detail-title"></h2>
+      <div class="archetype" id="detail-archetype"></div>
+    </div>
+  </div>
+  <div class="metrics-row" id="metrics-row"></div>
+  <div class="section-label">Applicant Journey Funnel</div>
+  <div id="funnel-container"></div>
+  <div class="detail-grid">
+    <div class="detail-chart-box">
+      <div class="chart-title">Days Before School Start — Applied</div>
+      <div class="chart-subtitle">Average application timing compared across all clusters</div>
+      <svg id="dist-chart" width="100%" height="170"></svg>
+    </div>
+    <div class="detail-chart-box">
+      <div class="chart-title">Schools Applied vs. Schools Registered</div>
+      <div class="chart-subtitle">Mean portfolio breadth by cluster</div>
+      <svg id="bar-chart" width="100%" height="170"></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+const PCA_POINTS = [{"pca1":-1.3409717374,"pca2":-1.6338189834,"cluster":0},{"pca1":-1.7875426098,"pca2":0.8771485238,"cluster":0},{"pca1":-2.5022317501,"pca2":-1.5330017705,"cluster":0},{"pca1":-2.4304243666,"pca2":-1.1069559275,"cluster":0},{"pca1":-2.3163510492,"pca2":-0.1419522898,"cluster":0},{"pca1":-1.485837776,"pca2":0.3877185667,"cluster":0},{"pca1":-2.4997001709,"pca2":-0.3610314056,"cluster":0},{"pca1":-1.5447990928,"pca2":0.1326729521,"cluster":0},{"pca1":-2.4406614585,"pca2":-1.6849087819,"cluster":0},{"pca1":1.0922056745,"pca2":-0.0366137255,"cluster":0},{"pca1":-1.5776708722,"pca2":0.7823404451,"cluster":0},{"pca1":-2.4107819614,"pca2":-0.662782071,"cluster":0},{"pca1":-2.599992527,"pca2":-1.0924863541,"cluster":0},{"pca1":-2.1433132652,"pca2":1.0588061845,"cluster":0},{"pca1":-2.5256916759,"pca2":-0.3731494436,"cluster":0},{"pca1":-1.5646610828,"pca2":0.9337607096,"cluster":0},{"pca1":-1.6333069162,"pca2":-0.0188640988,"cluster":0},{"pca1":-2.5992687733,"pca2":-0.8352727451,"cluster":0},{"pca1":-2.6394817488,"pca2":-1.1297318602,"cluster":0},{"pca1":-1.5083637126,"pca2":0.0504672293,"cluster":0},{"pca1":-0.0612601384,"pca2":-0.3159725042,"cluster":0},{"pca1":-2.7272215976,"pca2":0.8042226948,"cluster":0},{"pca1":-2.4759325348,"pca2":-0.2207305267,"cluster":0},{"pca1":-1.3539998337,"pca2":-0.6410055727,"cluster":0},{"pca1":-1.5533150631,"pca2":-0.1591605617,"cluster":0},{"pca1":-2.1919598135,"pca2":-1.3463281963,"cluster":0},{"pca1":-1.4164864923,"pca2":0.3707627265,"cluster":0},{"pca1":-2.2521295399,"pca2":-0.5898681451,"cluster":0},{"pca1":-1.3000364525,"pca2":-1.030902481,"cluster":0},{"pca1":-2.2240765106,"pca2":-0.6755959076,"cluster":0},{"pca1":-2.4198247733,"pca2":-1.2548144049,"cluster":0},{"pca1":-2.5226118069,"pca2":-0.4618114064,"cluster":0},{"pca1":0.0979443972,"pca2":-2.6276452074,"cluster":0},{"pca1":-2.3113803442,"pca2":0.0658651107,"cluster":0},{"pca1":-1.6384293997,"pca2":-0.4691096832,"cluster":0},{"pca1":-1.4490191906,"pca2":-0.3013221252,"cluster":0},{"pca1":-2.3823564721,"pca2":-0.8743425609,"cluster":0},{"pca1":-2.5211422292,"pca2":-0.5693020978,"cluster":0},{"pca1":-2.3379742393,"pca2":-1.2858994313,"cluster":0},{"pca1":-2.3785138915,"pca2":-0.5820626026,"cluster":0},{"pca1":-2.4632657436,"pca2":-0.7687637466,"cluster":0},{"pca1":-1.7335470478,"pca2":0.4249767585,"cluster":0},{"pca1":-1.4192770169,"pca2":0.2726485049,"cluster":0},{"pca1":-1.3490040131,"pca2":0.4140380275,"cluster":0},{"pca1":-1.2131382454,"pca2":-0.0661668138,"cluster":0},{"pca1":-1.6295450922,"pca2":-0.3506500759,"cluster":0},{"pca1":-2.4169338629,"pca2":-0.2540032682,"cluster":0},{"pca1":-1.4902817268,"pca2":0.4437693468,"cluster":0},{"pca1":-2.5049715375,"pca2":-0.8225287423,"cluster":0},{"pca1":-2.2645466695,"pca2":-1.1204644045,"cluster":0},{"pca1":-1.4723823385,"pca2":-1.0469585229,"cluster":0},{"pca1":3.6083367605,"pca2":-1.9432357151,"cluster":1},{"pca1":3.4668285016,"pca2":-2.3199135274,"cluster":1},{"pca1":3.5554195781,"pca2":-2.2825114437,"cluster":1},{"pca1":2.8231989888,"pca2":-1.8236236891,"cluster":1},{"pca1":3.6320586739,"pca2":-1.8055058505,"cluster":1},{"pca1":3.7185774798,"pca2":-2.5127763946,"cluster":1},{"pca1":2.9017724114,"pca2":-1.8027177925,"cluster":1},{"pca1":4.5160919924,"pca2":-0.3050758789,"cluster":1},{"pca1":3.671822303,"pca2":-2.2949446661,"cluster":1},{"pca1":4.4683422879,"pca2":-0.3958914272,"cluster":1},{"pca1":4.2834450476,"pca2":-0.3748976377,"cluster":1},{"pca1":4.4202124843,"pca2":-0.4109105278,"cluster":1},{"pca1":3.695535484,"pca2":-2.1923399741,"cluster":1},{"pca1":3.7481223138,"pca2":-2.300917918,"cluster":1},{"pca1":4.4869382627,"pca2":0.3031553578,"cluster":1},{"pca1":1.8717084647,"pca2":-2.7222799851,"cluster":1},{"pca1":2.2589189581,"pca2":-1.0338232939,"cluster":1},{"pca1":3.4901795104,"pca2":-2.1729260584,"cluster":1},{"pca1":3.5596453318,"pca2":-0.0358301586,"cluster":1},{"pca1":3.8798008916,"pca2":-2.2240913663,"cluster":1},{"pca1":3.5784348777,"pca2":-2.3336176836,"cluster":1},{"pca1":1.1018991341,"pca2":-2.4201159604,"cluster":1},{"pca1":2.8216165647,"pca2":-2.0681080497,"cluster":1},{"pca1":3.5280370727,"pca2":-2.6624953791,"cluster":1},{"pca1":3.4723735736,"pca2":-2.5822051281,"cluster":1},{"pca1":3.4431867712,"pca2":-1.2147137091,"cluster":1},{"pca1":4.2051109162,"pca2":-0.9542039355,"cluster":1},{"pca1":4.1471970143,"pca2":-0.4033403557,"cluster":1},{"pca1":3.5044717127,"pca2":-2.4637048712,"cluster":1},{"pca1":1.9019665816,"pca2":-2.5358617613,"cluster":1},{"pca1":3.3836802565,"pca2":-1.0456576797,"cluster":1},{"pca1":4.0321463942,"pca2":-1.5205398837,"cluster":1},{"pca1":3.4953128461,"pca2":-1.919665281,"cluster":1},{"pca1":3.5916152827,"pca2":-2.013441613,"cluster":1},{"pca1":3.5533655663,"pca2":-2.3400127207,"cluster":1},{"pca1":4.0669987184,"pca2":-0.6067456341,"cluster":1},{"pca1":3.5680082968,"pca2":-2.324010912,"cluster":1},{"pca1":3.6786155773,"pca2":-1.9347078038,"cluster":1},{"pca1":4.5160817709,"pca2":0.0967084238,"cluster":1},{"pca1":3.8511864347,"pca2":0.2929677943,"cluster":1},{"pca1":4.5563400567,"pca2":0.3309942886,"cluster":1},{"pca1":4.0213806236,"pca2":-1.4337404278,"cluster":1},{"pca1":2.5514641865,"pca2":0.0700426636,"cluster":1},{"pca1":1.8480484204,"pca2":-2.41262921,"cluster":1},{"pca1":3.4979825334,"pca2":-2.5315277904,"cluster":1},{"pca1":4.4350014916,"pca2":-0.6841448298,"cluster":1},{"pca1":4.2665693774,"pca2":-0.7869368852,"cluster":1},{"pca1":3.576096147,"pca2":-2.5670072521,"cluster":1},{"pca1":2.84430792,"pca2":-1.9694985942,"cluster":1},{"pca1":3.6834785829,"pca2":-1.7154829857,"cluster":1},{"pca1":3.5638537153,"pca2":-2.6405448312,"cluster":1},{"pca1":3.988278057,"pca2":1.2895820196,"cluster":2},{"pca1":4.5392715321,"pca2":0.8993602524,"cluster":2},{"pca1":5.6392174651,"pca2":2.8819639205,"cluster":2},{"pca1":5.2077300632,"pca2":1.1901304318,"cluster":2},{"pca1":5.5016829291,"pca2":2.5631783649,"cluster":2},{"pca1":1.770918889,"pca2":3.0581958692,"cluster":2},{"pca1":2.5375670053,"pca2":3.2026074276,"cluster":2},{"pca1":2.2128657693,"pca2":4.7518764347,"cluster":2},{"pca1":5.5577245063,"pca2":3.1900427489,"cluster":2},{"pca1":2.2416089289,"pca2":4.9168470821,"cluster":2},{"pca1":5.6405673722,"pca2":2.7334671257,"cluster":2},{"pca1":2.102398327,"pca2":5.1443825289,"cluster":2},{"pca1":5.5142513909,"pca2":3.0820628441,"cluster":2},{"pca1":5.7400368176,"pca2":2.9400980622,"cluster":2},{"pca1":2.0801225079,"pca2":4.5275444322,"cluster":2},{"pca1":5.6190076911,"pca2":2.3924635847,"cluster":2},{"pca1":4.7437916944,"pca2":0.6984232011,"cluster":2},{"pca1":4.7191341152,"pca2":0.7538337559,"cluster":2},{"pca1":5.6513432043,"pca2":2.5685314353,"cluster":2},{"pca1":5.5884430254,"pca2":2.8234210583,"cluster":2},{"pca1":4.582640045,"pca2":0.9621989408,"cluster":2},{"pca1":2.8231941305,"pca2":4.4985079365,"cluster":2},{"pca1":5.7533797594,"pca2":2.872508463,"cluster":2},{"pca1":5.2708753545,"pca2":1.5628630805,"cluster":2},{"pca1":5.4018906642,"pca2":2.6045252952,"cluster":2},{"pca1":4.7206708617,"pca2":0.7914037395,"cluster":2},{"pca1":4.9304146651,"pca2":0.9034643662,"cluster":2},{"pca1":5.7882943515,"pca2":2.4939359806,"cluster":2},{"pca1":4.8553498187,"pca2":0.6569459732,"cluster":2},{"pca1":5.6243443833,"pca2":2.8109078086,"cluster":2},{"pca1":2.2637511662,"pca2":4.8821088754,"cluster":2},{"pca1":5.5367160637,"pca2":2.7740276127,"cluster":2},{"pca1":4.6850655268,"pca2":0.7753688537,"cluster":2},{"pca1":5.2305178495,"pca2":1.1120276505,"cluster":2},{"pca1":5.1210137013,"pca2":1.5398367833,"cluster":2},{"pca1":2.2692358797,"pca2":8.0364484927,"cluster":2},{"pca1":4.3089089605,"pca2":0.7318895358,"cluster":2},{"pca1":5.5406037814,"pca2":3.0429652912,"cluster":2},{"pca1":5.4742313186,"pca2":2.6442697198,"cluster":2},{"pca1":4.6523564132,"pca2":0.7111742333,"cluster":2},{"pca1":5.5917928492,"pca2":2.8266531124,"cluster":2},{"pca1":4.5409894424,"pca2":0.8144385626,"cluster":2},{"pca1":5.103171169,"pca2":1.0177242804,"cluster":2},{"pca1":5.1119623893,"pca2":1.0395676599,"cluster":2},{"pca1":4.8014549816,"pca2":0.7672300778,"cluster":2},{"pca1":2.0373357031,"pca2":4.3690741578,"cluster":2},{"pca1":2.0449770433,"pca2":4.7921389664,"cluster":2},{"pca1":4.740234596,"pca2":0.465079166,"cluster":2},{"pca1":4.6285519752,"pca2":0.5882912689,"cluster":2},{"pca1":4.7093546394,"pca2":0.8022549107,"cluster":2},{"pca1":-0.5134613387,"pca2":4.0335352549,"cluster":3},{"pca1":1.188185964,"pca2":2.9316428964,"cluster":3},{"pca1":-0.8440721946,"pca2":3.3847413698,"cluster":3},{"pca1":-0.7316413555,"pca2":3.1102297345,"cluster":3},{"pca1":1.6875576282,"pca2":3.0408191457,"cluster":3},{"pca1":-1.3248384192,"pca2":2.5827983887,"cluster":3},{"pca1":-1.0955732299,"pca2":1.7336593136,"cluster":3},{"pca1":-1.5594715421,"pca2":3.5693631072,"cluster":3},{"pca1":-2.7024071081,"pca2":1.2970374427,"cluster":3},{"pca1":1.1907563255,"pca2":2.9398166868,"cluster":3},{"pca1":-1.108658937,"pca2":1.5091425846,"cluster":3},{"pca1":-0.0990614437,"pca2":2.6833080866,"cluster":3},{"pca1":1.1901127958,"pca2":2.1953246444,"cluster":3},{"pca1":0.828445321,"pca2":1.0783062154,"cluster":3},{"pca1":-2.661248457,"pca2":1.2929807196,"cluster":3},{"pca1":1.1867127701,"pca2":2.819225717,"cluster":3},{"pca1":-1.0380027417,"pca2":2.6663368176,"cluster":3},{"pca1":-1.080589951,"pca2":1.4636016909,"cluster":3},{"pca1":-1.2044268711,"pca2":1.4746589655,"cluster":3},{"pca1":-1.0955790132,"pca2":1.8928174173,"cluster":3},{"pca1":0.6262762943,"pca2":0.8075089253,"cluster":3},{"pca1":-1.2961421346,"pca2":1.0222370374,"cluster":3},{"pca1":-2.1265561186,"pca2":3.5360471458,"cluster":3},{"pca1":-0.6208971806,"pca2":0.7403725655,"cluster":3},{"pca1":-1.3406940893,"pca2":2.0092299274,"cluster":3},{"pca1":-1.3064513317,"pca2":1.4442992168,"cluster":3},{"pca1":-1.3692269385,"pca2":2.8532378197,"cluster":3},{"pca1":-1.0753373802,"pca2":1.5494765562,"cluster":3},{"pca1":-1.3792699965,"pca2":1.8215331561,"cluster":3},{"pca1":-1.0284815078,"pca2":3.0399895069,"cluster":3},{"pca1":-0.9439202574,"pca2":1.9031897861,"cluster":3},{"pca1":-0.9026158647,"pca2":3.1097443489,"cluster":3},{"pca1":0.9509163463,"pca2":1.6625306625,"cluster":3},{"pca1":-1.0049126793,"pca2":1.7154354548,"cluster":3},{"pca1":1.425484878,"pca2":1.864236393,"cluster":3},{"pca1":-1.4149052031,"pca2":1.01755625,"cluster":3},{"pca1":-1.1968049885,"pca2":2.1374104626,"cluster":3},{"pca1":1.2036631294,"pca2":2.6274092404,"cluster":3},{"pca1":-1.6256628411,"pca2":3.4241284328,"cluster":3},{"pca1":-0.8604439821,"pca2":2.2046910644,"cluster":3},{"pca1":-2.4129837116,"pca2":1.7518846745,"cluster":3},{"pca1":-1.5716031285,"pca2":1.1822024802,"cluster":3},{"pca1":-2.4927456597,"pca2":2.1128304515,"cluster":3},{"pca1":-1.2179960869,"pca2":1.4585496981,"cluster":3},{"pca1":-0.956989629,"pca2":1.9091802719,"cluster":3},{"pca1":-1.1472068162,"pca2":2.3674241319,"cluster":3},{"pca1":1.6212774785,"pca2":2.8034119735,"cluster":3},{"pca1":-0.0246249877,"pca2":2.4925752823,"cluster":3},{"pca1":1.2320499091,"pca2":3.0623523162,"cluster":3},{"pca1":-1.2115101643,"pca2":1.4643831799,"cluster":3}];
+
+const CLUSTER_SUMMARY = {"0":{"F_NumberSchoolsAppliedCount":1.157,"SiblingCurrentlyEnrolled":0.112,"WasAccepted":0.630,"WasRegistered":0.041,"WentNA":0.416,"NumberSchoolsRegisteredCount":0.007,"AppdaysBeforeSchoolStart":96.2,"StartedInFirstWeek":0.001,"StillEnrolledOnStartDatePlus7":0.0001,"Enrolled":0.066},"1":{"F_NumberSchoolsAppliedCount":1.034,"SiblingCurrentlyEnrolled":0.835,"WasAccepted":1.0,"WasRegistered":0.881,"WentNA":0.012,"NumberSchoolsRegisteredCount":0.004,"AppdaysBeforeSchoolStart":81.8,"StartedInFirstWeek":0.982,"StillEnrolledOnStartDatePlus7":0.966,"Enrolled":0.996},"2":{"F_NumberSchoolsAppliedCount":1.543,"SiblingCurrentlyEnrolled":0.673,"WasAccepted":1.0,"WasRegistered":0.995,"WentNA":0.242,"NumberSchoolsRegisteredCount":0.901,"AppdaysBeforeSchoolStart":286.5,"StartedInFirstWeek":0.706,"StillEnrolledOnStartDatePlus7":0.699,"Enrolled":0.709},"3":{"F_NumberSchoolsAppliedCount":2.019,"SiblingCurrentlyEnrolled":0.048,"WasAccepted":0.963,"WasRegistered":0.191,"WentNA":0.941,"NumberSchoolsRegisteredCount":0.161,"AppdaysBeforeSchoolStart":246.0,"StartedInFirstWeek":0.0004,"StillEnrolledOnStartDatePlus7":0.0003,"Enrolled":0.001}};
+
+const COLORS      = ["#E69F00","#0072B2","#009E73","#D55E00"];
+const COLORS_DARK = ["#8a5800","#00497a","#006b4e","#8a3b00"];
+const COLORS_DIM  = ["rgba(230,159,0,0.10)","rgba(0,114,178,0.10)","rgba(0,158,115,0.10)","rgba(213,94,0,0.10)"];
+
+const CLUSTER_META = {
+  0:{ title:"Disengaged Applicant", archetype:"Applied and disappeared — likely lottery-blocked", n:121237, pct:"53.3%", desc:"The majority cluster. Applied but rarely progressed — high repeat application rate suggests persistent lottery attempts, not disinterest." },
+  1:{ title:"Committed Enrollee", archetype:"Persistently pursued this school and followed through completely", n:44386, pct:"19.5%", desc:"Highest conversion of any cluster. Nearly all enrolled, started week 1, and remained enrolled at +7 days. Sibling enrollment rate is highest." },
+  2:{ title:"Early Planner Who Wavers", archetype:"Strategic early planners shopping multiple schools — not necessarily their top choice", n:18059, pct:"7.9%", desc:"Applied earliest (~287 days out), almost all lottery-accepted and registered, but ~30% did not ultimately enroll." },
+  3:{ title:"Ghost Acceptee", archetype:"Accepted an offer they never intended to use — this school was a backup", n:43959, pct:"19.3%", desc:"Applied to the most schools, accepted but almost never registered. Highest No Action rate. Most likely committed to another school." }
+};
+
+let activeCluster = null;
+
+function init() { buildCards(); buildScatter(); showOverview(); }
+
+function showOverview() {
+  document.getElementById('overview').classList.add('active');
+  document.getElementById('detail').classList.remove('active');
+  document.getElementById('bc-sep').style.display = 'none';
+  document.getElementById('bc-cluster').style.display = 'none';
+  resetHighlight();
+}
+
+function showDetail(c) {
+  document.getElementById('overview').classList.remove('active');
+  document.getElementById('detail').classList.add('active');
+  document.getElementById('bc-sep').style.display = '';
+  const bc = document.getElementById('bc-cluster');
+  bc.style.display = '';
+  bc.textContent = `Cluster ${c} — ${CLUSTER_META[c].title}`;
+  renderDetail(c);
+  window.scrollTo(0,0);
+}
+
+function buildScatter() {
+  const svg = d3.select('#pca-svg');
+  const container = document.getElementById('pca-panel');
+  function draw() {
+    svg.selectAll('*').remove();
+    const w = Math.max(280, container.clientWidth - 64);
+    const h = Math.max(180, container.clientHeight - 88);
+    svg.attr('viewBox', `0 0 ${w} ${h}`);
+    const pad = 26;
+    const xExt = d3.extent(PCA_POINTS, d=>d.pca1);
+    const yExt = d3.extent(PCA_POINTS, d=>d.pca2);
+    const xS = d3.scaleLinear().domain([xExt[0]-.5,xExt[1]+.5]).range([pad,w-pad]);
+    const yS = d3.scaleLinear().domain([yExt[0]-.5,yExt[1]+.5]).range([h-pad,pad]);
+
+    const grid = svg.append('g');
+    xS.ticks(4).forEach(t=>grid.append('line').attr('x1',xS(t)).attr('x2',xS(t)).attr('y1',pad).attr('y2',h-pad).attr('stroke','#e0dbd3').attr('stroke-width',1));
+    yS.ticks(4).forEach(t=>grid.append('line').attr('x1',pad).attr('x2',w-pad).attr('y1',yS(t)).attr('y2',yS(t)).attr('stroke','#e0dbd3').attr('stroke-width',1));
+
+    svg.append('g').selectAll('circle').data(PCA_POINTS).join('circle')
+      .attr('cx',d=>xS(d.pca1)).attr('cy',d=>yS(d.pca2))
+      .attr('r',4).attr('fill',d=>COLORS[d.cluster])
+      .attr('opacity',0.52).attr('stroke',d=>COLORS[d.cluster]).attr('stroke-width',0.5)
+      .attr('class',d=>`dot c${d.cluster}`)
+      .on('mouseenter',(e,d)=>{ highlightCluster(d.cluster); showTooltip(e,`Cluster ${d.cluster}: ${CLUSTER_META[d.cluster].title}`); })
+      .on('mousemove',moveTooltip)
+      .on('mouseleave',()=>{ resetHighlight(); hideTooltip(); });
+
+    [0,1,2,3].forEach(c=>{
+      const pts = PCA_POINTS.filter(d=>d.cluster===c);
+      svg.append('text')
+        .attr('x',d3.mean(pts,d=>xS(d.pca1))).attr('y',d3.mean(pts,d=>yS(d.pca2))-10)
+        .attr('text-anchor','middle').attr('font-family','Georgia,serif')
+        .attr('font-size',10).attr('fill',COLORS_DARK[c]).attr('font-weight','bold')
+        .text(`C${c}`);
+    });
+  }
+  draw();
+  window.addEventListener('resize', draw);
+}
+
+function buildCards() {
+  const panel = document.getElementById('cards-panel');
+  [0,1,2,3].forEach(c=>{
+    const m = CLUSTER_META[c]; const s = CLUSTER_SUMMARY[c];
+    const card = document.createElement('div');
+    card.className = 'cluster-card'; card.dataset.cluster = c;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-cluster-num">Cluster ${c}</div>
+        <div class="card-n">n = <span>${m.n.toLocaleString()}</span> &nbsp;·&nbsp; ${m.pct}</div>
+      </div>
+      <div class="card-title">${m.title}</div>
+      <div class="card-desc">${m.desc}</div>
+      <div class="card-stats">
+        <div class="stat"><div class="stat-label">Accepted</div><div class="stat-value" style="color:${COLORS_DARK[c]}">${pct(s.WasAccepted)}</div></div>
+        <div class="stat"><div class="stat-label">Registered</div><div class="stat-value" style="color:${COLORS_DARK[c]}">${pct(s.WasRegistered)}</div></div>
+        <div class="stat"><div class="stat-label">Enrolled</div><div class="stat-value" style="color:${COLORS_DARK[c]}">${pct(s.Enrolled)}</div></div>
+        <div class="stat"><div class="stat-label">Still +7d</div><div class="stat-value" style="color:${COLORS_DARK[c]}">${pct(s.StillEnrolledOnStartDatePlus7)}</div></div>
+      </div>
+      <div class="card-cta">View Journey →</div>`;
+    card.addEventListener('mouseenter',()=>highlightCluster(c));
+    card.addEventListener('mouseleave',()=>resetHighlight());
+    card.addEventListener('click',()=>showDetail(c));
+    panel.appendChild(card);
+  });
+}
+
+function highlightCluster(c) {
+  activeCluster = c;
+  document.querySelectorAll('.cluster-card').forEach(el=>{
+    const ec = parseInt(el.dataset.cluster);
+    el.classList.toggle('highlighted',ec===c); el.classList.toggle('dimmed',ec!==c);
+  });
+  document.querySelectorAll('.dot').forEach(el=>{
+    const ec = parseInt(el.classList[1].replace('c',''));
+    d3.select(el).attr('opacity',ec===c?0.85:0.06).attr('r',ec===c?5.5:3);
+  });
+}
+
+function resetHighlight() {
+  activeCluster = null;
+  document.querySelectorAll('.cluster-card').forEach(el=>el.classList.remove('highlighted','dimmed'));
+  document.querySelectorAll('.dot').forEach(el=>d3.select(el).attr('opacity',0.52).attr('r',4));
+}
+
+function renderDetail(c) {
+  const m = CLUSTER_META[c]; const s = CLUSTER_SUMMARY[c];
+  const badge = document.getElementById('detail-badge');
+  badge.textContent = c;
+  badge.style.background = COLORS_DIM[c];
+  badge.style.color = COLORS_DARK[c];
+  badge.style.border = `2px solid ${COLORS[c]}`;
+
+  document.getElementById('detail-title').textContent = m.title;
+  document.getElementById('detail-title').style.color = COLORS_DARK[c];
+  document.getElementById('detail-archetype').textContent = `"${m.archetype}"`;
+
+  const mr = document.getElementById('metrics-row'); mr.innerHTML='';
+  [
+    {label:'Cluster Size', value:m.n.toLocaleString(), sub:`${m.pct} of all applicants`},
+    {label:'Avg Schools Applied', value:s.F_NumberSchoolsAppliedCount.toFixed(2), sub:'portfolio breadth'},
+    {label:'Avg Days Applied Before Start', value:Math.round(s.AppdaysBeforeSchoolStart)+'d', sub:'application timing'},
+    {label:'Sibling Currently Enrolled', value:pct(s.SiblingCurrentlyEnrolled), sub:'family connection rate'},
+  ].forEach(met=>{
+    const box = document.createElement('div'); box.className='metric-box';
+    box.innerHTML=`<div class="metric-label">${met.label}</div><div class="metric-value" style="color:${COLORS_DARK[c]}">${met.value}</div><div class="metric-sub">${met.sub}</div>`;
+    mr.appendChild(box);
+  });
+
+  renderFunnel(c); renderDistChart(c); renderBarChart(c);
+}
+
+function renderFunnel(c) {
+  const s = CLUSTER_SUMMARY[c];
+  const steps=[
+    {name:'Applied',val:1.0},{name:'Accepted',val:s.WasAccepted},
+    {name:'Registered',val:s.WasRegistered},{name:'Enrolled',val:s.Enrolled},
+    {name:'Week 1',val:s.StartedInFirstWeek},{name:'Still +7d',val:s.StillEnrolledOnStartDatePlus7}
+  ];
+  const fc = document.getElementById('funnel-container'); fc.innerHTML='';
+  steps.forEach((step,i)=>{
+    const fstep = document.createElement('div'); fstep.className='funnel-step';
+    const barH = Math.max(3,Math.round(step.val*100));
+    const alpha = 0.3 + step.val*0.7;
+    fstep.innerHTML=`
+      <div class="funnel-pct" style="color:${COLORS_DARK[c]}">${pct(step.val)}</div>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="height:${barH}px;background:${COLORS[c]};opacity:${alpha};border:1.5px solid ${COLORS[c]}"></div>
+      </div>
+      <div class="funnel-name">${step.name}</div>`;
+    fc.appendChild(fstep);
+    if(i<steps.length-1){ const a=document.createElement('div'); a.className='funnel-arrow'; a.textContent='›'; fc.appendChild(a); }
+  });
+}
+
+function renderDistChart(activeC) {
+  const svg=d3.select('#dist-chart'); svg.selectAll('*').remove();
+  const W=Math.max(180,document.querySelector('#dist-chart').parentElement.clientWidth-40); const H=170;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const data=[0,1,2,3].map(c=>({cluster:c,val:CLUSTER_SUMMARY[c].AppdaysBeforeSchoolStart}));
+  const pad={l:44,r:8,t:12,b:36};
+  const xS=d3.scaleBand().domain([0,1,2,3]).range([pad.l,W-pad.r]).padding(0.35);
+  const yS=d3.scaleLinear().domain([0,320]).range([H-pad.b,pad.t]);
+
+  svg.append('g').attr('transform',`translate(0,${H-pad.b})`).call(d3.axisBottom(xS).tickFormat(d=>`C${d}`))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').remove();})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',11).attr('font-family','Georgia,serif'));
+  svg.append('g').attr('transform',`translate(${pad.l},0)`).call(d3.axisLeft(yS).ticks(4).tickFormat(d=>`${d}d`))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').attr('stroke','#e8e4dd');})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',10).attr('font-family','Georgia,serif'));
+
+  svg.selectAll('rect.b').data(data).join('rect').attr('class','b')
+    .attr('x',d=>xS(d.cluster)).attr('y',d=>yS(d.val))
+    .attr('width',xS.bandwidth()).attr('height',d=>H-pad.b-yS(d.val))
+    .attr('fill',d=>COLORS[d.cluster]).attr('opacity',d=>d.cluster===activeC?0.88:0.25)
+    .attr('stroke',d=>COLORS[d.cluster]).attr('stroke-width',d=>d.cluster===activeC?1.5:0.5).attr('rx',3);
+
+  svg.selectAll('text.v').data(data).join('text').attr('class','v')
+    .attr('x',d=>xS(d.cluster)+xS.bandwidth()/2).attr('y',d=>yS(d.val)-4)
+    .attr('text-anchor','middle').attr('font-size',10).attr('font-family','Georgia,serif')
+    .attr('fill',d=>d.cluster===activeC?COLORS_DARK[d.cluster]:'#8a98a4')
+    .attr('font-weight',d=>d.cluster===activeC?'bold':'normal')
+    .text(d=>Math.round(d.val)+'d');
+}
+
+function renderBarChart(activeC) {
+  const svg=d3.select('#bar-chart'); svg.selectAll('*').remove();
+  const W=Math.max(180,document.querySelector('#bar-chart').parentElement.clientWidth-40); const H=170;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const cats=['Applied','Registered'];
+  const data=[0,1,2,3].flatMap(c=>[
+    {cluster:c,cat:'Applied',val:CLUSTER_SUMMARY[c].F_NumberSchoolsAppliedCount},
+    {cluster:c,cat:'Registered',val:CLUSTER_SUMMARY[c].NumberSchoolsRegisteredCount}
+  ]);
+  const pad={l:44,r:8,t:12,b:36};
+  const x0=d3.scaleBand().domain([0,1,2,3]).range([pad.l,W-pad.r]).paddingInner(0.3);
+  const x1=d3.scaleBand().domain(cats).range([0,x0.bandwidth()]).padding(0.06);
+  const yS=d3.scaleLinear().domain([0,2.5]).range([H-pad.b,pad.t]);
+
+  svg.append('g').attr('transform',`translate(0,${H-pad.b})`).call(d3.axisBottom(x0).tickFormat(d=>`C${d}`))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').remove();})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',11).attr('font-family','Georgia,serif'));
+  svg.append('g').attr('transform',`translate(${pad.l},0)`).call(d3.axisLeft(yS).ticks(4))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').attr('stroke','#e8e4dd');})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',10).attr('font-family','Georgia,serif'));
+
+  svg.selectAll('rect.g').data(data).join('rect').attr('class','g')
+    .attr('x',d=>x0(d.cluster)+x1(d.cat)).attr('y',d=>yS(d.val))
+    .attr('width',x1.bandwidth()).attr('height',d=>H-pad.b-yS(d.val))
+    .attr('fill',d=>COLORS[d.cluster])
+    .attr('opacity',d=>{ const base=d.cluster===activeC?0.88:0.22; return d.cat==='Registered'?base*0.45:base; })
+    .attr('stroke',d=>COLORS[d.cluster]).attr('stroke-width',d=>d.cluster===activeC?1.5:0.5).attr('rx',2);
+
+  const lg=svg.append('g').attr('transform',`translate(${pad.l+2},${pad.t})`);
+  lg.append('rect').attr('width',10).attr('height',10).attr('fill','#4b5b68').attr('opacity',0.75).attr('rx',1);
+  lg.append('text').attr('x',13).attr('y',9).attr('font-size',9).attr('fill','#4b5b68').attr('font-family','Georgia,serif').text('Applied');
+  lg.append('rect').attr('x',56).attr('width',10).attr('height',10).attr('fill','#4b5b68').attr('opacity',0.3).attr('rx',1);
+  lg.append('text').attr('x',69).attr('y',9).attr('font-size',9).attr('fill','#4b5b68').attr('font-family','Georgia,serif').text('Multi-school Registered');
+}
+
+const tip=document.getElementById('tooltip');
+function showTooltip(e,txt){tip.textContent=txt;tip.style.opacity='1';moveTooltip(e);}
+function moveTooltip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-6)+'px';}
+function hideTooltip(){tip.style.opacity='0';}
+function pct(v){return v<0.001?'<1%':Math.round(v*100)+'%';}
+
+init();
+</script>
+</body>
+</html>
