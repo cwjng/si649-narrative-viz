@@ -69,7 +69,9 @@
     #flow-tooltip{position:fixed;background:var(--text);color:#fff;font-size:.78rem;padding:8px 12px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;max-width:220px;line-height:1.45;font-family:Georgia,serif;}
 
     /* CREDITS */
-    .credits{margin-top:36px;padding:18px 22px;border:1px solid var(--border);background:var(--surface);border-radius:10px;}
+    footer{padding:26px 5% 28px;border-top:1px solid var(--border);background:var(--surface);}
+    .footer-inner{max-width:1100px;margin:0 auto;}
+    .credits{padding:18px 22px;border:1px solid var(--border);background:var(--bg);border-radius:10px;}
     .credits-title{margin:0 0 12px;font-size:1rem;font-weight:bold;color:var(--text);}
     .credits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin-bottom:12px;}
     .credit-name{display:block;font-weight:700;font-size:.87rem;margin-bottom:1px;color:var(--text);}
@@ -161,17 +163,6 @@
   <div style="margin-top:24px;margin-bottom:8px;">
     <a href="appendix_flow.html" style="font-size:.8rem;color:#2c5f8a;text-decoration:none;">&#128196; Methodology Appendix &nearr;</a>
   </div>
-
-  <section class="credits">
-    <h2 class="credits-title">Assignment Information</h2>
-    <div class="credits-grid">
-      <div><span class="credit-name">Christina Ng</span><span class="credit-email">cwjng@umich.edu</span></div>
-      <div><span class="credit-name">Adia Lee</span><span class="credit-email">adialee@umich.edu</span></div>
-      <div><span class="credit-name">Selina Shan</span><span class="credit-email">sselina@umich.edu</span></div>
-      <div><span class="credit-name">Shirley Ai</span><span class="credit-email">shirleyi@umich.edu</span></div>
-    </div>
-    <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
-  </section>
 </div>
 
 <div id="flow-tooltip"></div>
@@ -554,5 +545,19 @@ Promise.all(
   console.info("Data files not found — visualization will render on GitHub Pages deployment.");
 });
 </script>
+<footer>
+  <div class="footer-inner">
+    <section class="credits">
+      <h2 class="credits-title">Assignment Information</h2>
+      <div class="credits-grid">
+        <div><span class="credit-name">Christina Ng</span><span class="credit-email">cwjng@umich.edu</span></div>
+        <div><span class="credit-name">Adia Lee</span><span class="credit-email">adialee@umich.edu</span></div>
+        <div><span class="credit-name">Selina Shan</span><span class="credit-email">sselina@umich.edu</span></div>
+        <div><span class="credit-name">Shirley Ai</span><span class="credit-email">shirleyi@umich.edu</span></div>
+      </div>
+      <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
+    </section>
+  </div>
+</footer>
 </body>
 </html>
