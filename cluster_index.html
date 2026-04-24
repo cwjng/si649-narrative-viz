@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applicant Archetypes — NHA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  :root {
+    --bg:#f7f5ef;--surface:#fffdf8;--border:#d8d2c6;--border2:#c5bfb4;
+    --text:#1f2933;--muted:#4b5b68;--muted2:#8a98a4;
+    --c1:#E69F00;--c2:#0072B2;--c3:#009E73;--c4:#D55E00;
+    --c1d:rgba(230,159,0,0.10);--c2d:rgba(0,114,178,0.10);--c3d:rgba(0,158,115,0.10);--c4d:rgba(213,94,0,0.10);
+    --c1k:#8a5800;--c2k:#00497a;--c3k:#006b4e;--c4k:#8a3b00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:Georgia,serif;font-size:14px;line-height:1.6;min-height:100vh;}
+  header{padding:20px 48px 16px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:flex-end;justify-content:space-between;}
+  header h1{font-size:1.85rem;font-weight:normal;line-height:1.1;margin:0 0 3px;}
+  .header-sub{font-size:.9rem;color:var(--muted);margin:0;}
+  .header-meta{font-size:.8rem;color:var(--muted);text-align:right;}
+  .header-meta span{color:var(--text);font-weight:bold;}
+  #prop-section{padding:14px 48px 12px;border-bottom:1px solid var(--border);background:var(--surface);}
+  .prop-label{font-size:.67rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  #prop-bar{display:flex;height:30px;border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+  .pseg{display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:bold;color:#fff;transition:opacity .2s;cursor:pointer;white-space:nowrap;}
+  .pseg span{text-shadow:0 1px 2px rgba(0,0,0,.3);padding:0 5px;}
+  .pseg.dimmed{opacity:.22;}
+  #prop-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:7px;}
+  .pleg{display:flex;align-items:center;gap:5px;font-size:.76rem;color:var(--muted);cursor:pointer;}
+  .pleg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  #breadcrumb{padding:9px 48px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--muted);}
+  .crumb{cursor:pointer;transition:color .15s;}.crumb:hover{color:var(--text);text-decoration:underline;}
+  .sep{opacity:.4;}.current{color:var(--text);}
+  .view{display:none;}.view.active{display:block;}
+  #pca-panel{padding:20px 28px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:9px;height:calc(100vh - 176px);overflow:hidden;}
+  .panel-label{font-size:.67rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+  #pca-svg{width:100%;flex:1;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:.74rem;color:var(--muted);}
+  .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  #cards-panel{padding:20px 28px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;height:calc(100vh - 176px);}
+  .ccard{border:1px solid var(--border);border-radius:10px;padding:13px 17px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;background:var(--surface);}
+  .ccard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:10px 0 0 10px;}
+  .ccard[data-ci="0"]::before{background:var(--c1);}
+  .ccard[data-ci="1"]::before{background:var(--c2);}
+  .ccard[data-ci="2"]::before{background:var(--c3);}
+  .ccard[data-ci="3"]::before{background:var(--c4);}
+  .ccard.dimmed{opacity:.27;}
+  .ccard.highlighted{border-color:var(--border2);box-shadow:0 2px 10px rgba(0,0,0,.09);}
+  .ccard[data-ci="0"].highlighted{background:var(--c1d);}
+  .ccard[data-ci="1"].highlighted{background:var(--c2d);}
+  .ccard[data-ci="2"].highlighted{background:var(--c3d);}
+  .ccard[data-ci="3"].highlighted{background:var(--c4d);}
+  .ccard:hover:not(.dimmed){box-shadow:0 1px 6px rgba(0,0,0,.07);}
+  .card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;}
+  .card-cn{font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);}
+  .card-n{font-size:.72rem;color:var(--muted);}
+  .card-n span{color:var(--text);font-weight:bold;}
+  .card-title{font-size:1rem;font-weight:bold;margin-bottom:4px;}
+  .ccard[data-ci="0"] .card-title{color:var(--c1k);}
+  .ccard[data-ci="1"] .card-title{color:var(--c2k);}
+  .ccard[data-ci="2"] .card-title{color:var(--c3k);}
+  .ccard[data-ci="3"] .card-title{color:var(--c4k);}
+  .card-desc{font-size:.81rem;color:var(--muted);line-height:1.44;}
+  .card-cta{position:absolute;right:13px;bottom:11px;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);opacity:0;transition:opacity .18s;}
+  .ccard:hover .card-cta{opacity:1;}
+  #detail{display:none;padding:26px 48px 48px;max-width:1080px;margin:0 auto;}
+  #detail.active{display:block;}
+  .back-btn{display:inline-flex;align-items:center;gap:5px;font-size:.77rem;color:var(--muted);cursor:pointer;border:1px solid var(--border);padding:5px 13px;border-radius:6px;transition:all .15s;margin-bottom:20px;background:var(--surface);font-family:Georgia,serif;}
+  .back-btn:hover{color:var(--text);border-color:var(--border2);}
+  .det-hdr{display:flex;align-items:flex-start;gap:16px;margin-bottom:12px;}
+  .det-badge{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:21px;font-weight:bold;flex-shrink:0;margin-top:3px;}
+  .det-title-block h2{font-size:1.8rem;font-weight:normal;margin-bottom:3px;font-family:Georgia,serif;}
+  .det-arch{font-size:.86rem;color:var(--muted);font-style:italic;margin-bottom:8px;}
+  .det-desc-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 15px;font-size:.85rem;color:var(--muted);line-height:1.55;margin-bottom:22px;}
+  .sec-label{font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+  .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:24px;}
+  .mbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
+  .mlabel{font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted2);margin-bottom:3px;}
+  .mval{font-family:Georgia,serif;font-size:1.5rem;font-weight:normal;}
+  .msub{font-size:.69rem;color:var(--muted);margin-top:1px;}
+  #tl-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:26px 30px 20px;margin-bottom:24px;}
+  #tl-svg{width:100%;overflow:visible;}
+  .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;}
+  .det-chart-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 19px;}
+  .ctitle{font-size:.86rem;color:var(--text);margin-bottom:2px;font-weight:bold;}
+  .csub{font-size:.72rem;color:var(--muted);margin-bottom:11px;}
+  #tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 11px;font-size:.77rem;pointer-events:none;opacity:0;transition:opacity .12s;z-index:200;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.1);font-family:Georgia,serif;max-width:200px;line-height:1.45;}
+  ::-webkit-scrollbar{width:5px;}
+  .prop-stats{font-size:.75rem;color:var(--muted);margin-top:8px;padding-top:6px;border-top:1px solid var(--border);}
+  .prop-stats span{color:var(--text);font-weight:bold;}
+  #overview{display:none;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;}
+  #overview.active{display:grid;}
+  #overview-guide{grid-column:1/-1;padding:11px 28px 10px;background:var(--surface);border-bottom:1px solid var(--border);font-size:.83rem;color:var(--muted);line-height:1.5;}
+  #overview-guide strong{color:var(--text);}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+
+<style>
+  #site-nav{background:#fffdf8;border-bottom:1px solid #d8d2c6;padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;font-family:Georgia,serif;}
+  #site-nav .nav-brand{font-size:1rem;font-weight:bold;color:#1f2933;}
+  #site-nav .nav-brand span{color:#2c5f8a;font-weight:normal;}
+  #site-nav .nav-links{display:flex;gap:24px;align-items:center;}
+  #site-nav .nav-links a{font-size:.82rem;color:#4b5b68;text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;}
+  #site-nav .nav-links a:hover,#site-nav .nav-links a.active{color:#1f2933;}
+  .cluster-topbar{background:#fffdf8;border-bottom:1px solid #d8d2c6;padding:10px 48px;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;color:#4b5b68;font-family:Georgia,serif;}
+  .cluster-topbar a{color:#2c5f8a;text-decoration:none;}
+  .cluster-topbar a:hover{text-decoration:underline;}
+  .cluster-guide{padding:11px 48px 10px;background:#fffdf8;border-bottom:1px solid #d8d2c6;font-family:Georgia,serif;}
+  .cluster-guide-text{font-size:.83rem;color:#4b5b68;line-height:1.5;max-width:900px;}
+  .cluster-guide-text strong{color:#1f2933;}
+</style>
+</head>
+<body>
+<nav id="site-nav">
+  <div class="nav-brand">NHA &nbsp;<span>Applicant Journey</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="flow.html">Flow Viz</a>
+    <a href="cluster_index.html" class="active">Cluster Viz</a>
+    <a href="appendix_cluster.html">Methodology</a>
+  </div>
+</nav>
+
+<header>
+  <div><h1>Student Applicant Journey</h1><p class="header-sub">Cluster analysis of applicant journey archetypes.</p></div>
+</header>
+<div id="prop-section">
+  <div class="prop-label">Proportion of applicants by cluster — hover or click to filter</div>
+  <div id="prop-bar"></div>
+  <div id="prop-legend"></div>
+  <div class="prop-stats">N&nbsp;=&nbsp;<span>227,641</span> applicants &nbsp;&middot;&nbsp; k&nbsp;=&nbsp;<span>4</span> clusters &nbsp;&middot;&nbsp; PCA&nbsp;=&nbsp;<span>2</span> components</div>
+</div>
+<div id="breadcrumb">
+  <span class="crumb" onclick="showOverview()">Overview</span>
+  <span class="sep" id="bc-sep" style="display:none">›</span>
+  <span class="current" id="bc-cl" style="display:none"></span>
+</div>
+<div id="tooltip"></div>
+<div id="overview" class="view">
+  <div id="overview-guide">
+    <strong>How to explore:</strong> Click any segment in the proportion bar or any archetype card to drill into that cluster. In the detail view, hover the journey timeline dots for raw counts and hover chart bars for comparisons. <strong>Double-click</strong> or use the back button to return to the overview.
+  </div>
+  <div id="pca-panel">
+    <div class="panel-label">PCA Scatterplot &nbsp;·&nbsp; sampled points per cluster</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#E69F00"></div>Cluster 1 — Ghost Acceptee</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0072B2"></div>Cluster 2 — Committed Enrollee</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#009E73"></div>Cluster 3 — Never Accepted</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#D55E00"></div>Cluster 4 — Partial Converter</div>
+    </div>
+    <svg id="pca-svg"></svg>
+  </div>
+  <div id="cards-panel">
+    <div class="panel-label" style="margin-bottom:2px">Applicant Archetypes</div>
+  </div>
+</div>
+<div id="detail" class="view">
+  <div class="back-btn" onclick="showOverview()">← Back to Overview</div>
+  <div class="det-hdr">
+    <div class="det-badge" id="det-badge">1</div>
+    <div class="det-title-block"><h2 id="det-title"></h2><div class="det-arch" id="det-arch"></div></div>
+  </div>
+  <div class="det-desc-box" id="det-desc"></div>
+  <div class="metrics-row" id="metrics-row"></div>
+  <div class="sec-label">Applicant Journey Timeline</div>
+  <div id="tl-box"><svg id="tl-svg"></svg></div>
+  <div class="det-grid">
+    <div class="det-chart-box">
+      <div class="ctitle">Days Applied Before School Start</div>
+      <div class="csub">Distribution of application timing for this cluster</div>
+      <svg id="hist-svg" width="100%" height="185"></svg>
+    </div>
+    <div class="det-chart-box">
+      <div class="ctitle">Sibling Currently Enrolled</div>
+      <div class="csub">Share of applicants with a family connection, compared across clusters</div>
+      <svg id="sib-svg" width="100%" height="185"></svg>
+    </div>
+  </div>
+</div>
+<script>
+const COLORS=["#E69F00","#0072B2","#009E73","#D55E00"];
+const CDARKS=["#8a5800","#00497a","#006b4e","#8a3b00"];
+const CDIMS=["rgba(230,159,0,.10)","rgba(0,114,178,.10)","rgba(0,158,115,.10)","rgba(213,94,0,.10)"];
+const META=[
+  {d:1,title:"Ghost Acceptee",arch:"Accepted but walked away — likely committed elsewhere or never followed through",desc:"These applicants were almost universally accepted (≈100%) but took virtually no action afterward — only 0.009% registered and 0.3% enrolled. Nearly three quarters went No Action (74.5%). Acceptance timing data is present but registration timing is entirely missing, confirming they never reached that stage. Low sibling enrollment rate (8%) suggests limited prior connection to the school.",n:97566,pct:"43.0%",funnel:[{l:"Applied",n:97566},{l:"Accepted",n:97564},{l:"Registered",n:9},{l:"Enrolled",n:253},{l:"Week 1",n:0},{l:"+7 Days",n:0}],sib:{yes:8116,no:89450}},
+  {d:2,title:"Committed Enrollee",arch:"Fully committed — family-connected, focused, and followed through at every step",desc:"Every applicant was accepted, registered, and enrolled (100% at each stage). 99% started in the first week and 97.6% were still enrolled at +7 days. Registration occurred ~94 days before school start, reflecting deliberate and timely decision-making. Sibling enrollment is by far the highest of any cluster (87%), indicating strong family familiarity. Applied to the fewest schools overall (1.12 avg), suggesting this was their clear first choice.",n:51389,pct:"22.7%",funnel:[{l:"Applied",n:51389},{l:"Accepted",n:51389},{l:"Registered",n:51389},{l:"Enrolled",n:51389},{l:"Week 1",n:50903},{l:"+7 Days",n:50139}],sib:{yes:44551,no:6838}},
+  {d:3,title:"Never Accepted",arch:"Wanted in but never got an offer — lottery-blocked or ineligible, not disengaged",desc:"This cluster is defined by a complete absence of acceptance — 0% were accepted and 0% enrolled. All acceptance and registration timing data is missing. Despite this, WentNA is only 20.7%, suggesting many did not formally go No Action but simply never received an offer. They live the furthest from school on average and apply to more schools (1.49 avg). This group captures applicants blocked by lottery or eligibility, not by lack of intent.",n:46435,pct:"20.5%",funnel:[{l:"Applied",n:46435},{l:"Accepted",n:0},{l:"Registered",n:1},{l:"Enrolled",n:0},{l:"Week 1",n:0},{l:"+7 Days",n:0}],sib:{yes:1267,no:45168}},
+  {d:4,title:"Partial Converter",arch:"Initial acceptance, then progressive disengagement — likely due to competing offers elsewhere",desc:"These applicants were all accepted (100%) and over half registered (59%), but engagement progressively declines: enrollment falls to 41.7%, first-week attendance to 17.1%, and 7-day retention to 16.6%. WentNA at 43% despite registration activity signals clear mid-funnel disengagement. About 59% have sentinel registration dates, suggesting a subset registered at another school instead. Moderate sibling enrollment (34%) and a broader school search suggest they were weighing competing options throughout.",n:32251,pct:"14.2%",funnel:[{l:"Applied",n:32251},{l:"Accepted",n:32251},{l:"Registered",n:19044},{l:"Enrolled",n:13441},{l:"Week 1",n:5520},{l:"+7 Days",n:5366}],sib:{yes:10953,no:21298}}
+];
+const TOTAL=227641;
+const PCA_PTS=[{"pca1":-1.3409717374,"pca2":-1.6338189834,"cluster":0},{"pca1":-1.7875426098,"pca2":0.8771485238,"cluster":0},{"pca1":-2.5022317501,"pca2":-1.5330017705,"cluster":0},{"pca1":-2.4304243666,"pca2":-1.1069559275,"cluster":0},{"pca1":-2.3163510492,"pca2":-0.1419522898,"cluster":0},{"pca1":-1.485837776,"pca2":0.3877185667,"cluster":0},{"pca1":-2.4997001709,"pca2":-0.3610314056,"cluster":0},{"pca1":-1.5447990928,"pca2":0.1326729521,"cluster":0},{"pca1":-2.4406614585,"pca2":-1.6849087819,"cluster":0},{"pca1":1.0922056745,"pca2":-0.0366137255,"cluster":0},{"pca1":-1.5776708722,"pca2":0.7823404451,"cluster":0},{"pca1":-2.4107819614,"pca2":-0.662782071,"cluster":0},{"pca1":-2.599992527,"pca2":-1.0924863541,"cluster":0},{"pca1":-2.1433132652,"pca2":1.0588061845,"cluster":0},{"pca1":-2.5256916759,"pca2":-0.3731494436,"cluster":0},{"pca1":-1.5646610828,"pca2":0.9337607096,"cluster":0},{"pca1":-1.6333069162,"pca2":-0.0188640988,"cluster":0},{"pca1":-2.5992687733,"pca2":-0.8352727451,"cluster":0},{"pca1":-2.6394817488,"pca2":-1.1297318602,"cluster":0},{"pca1":-1.5083637126,"pca2":0.0504672293,"cluster":0},{"pca1":-0.0612601384,"pca2":-0.3159725042,"cluster":0},{"pca1":-2.7272215976,"pca2":0.8042226948,"cluster":0},{"pca1":-2.4759325348,"pca2":-0.2207305267,"cluster":0},{"pca1":-1.3539998337,"pca2":-0.6410055727,"cluster":0},{"pca1":-1.5533150631,"pca2":-0.1591605617,"cluster":0},{"pca1":-2.1919598135,"pca2":-1.3463281963,"cluster":0},{"pca1":-1.4164864923,"pca2":0.3707627265,"cluster":0},{"pca1":-2.2521295399,"pca2":-0.5898681451,"cluster":0},{"pca1":-1.3000364525,"pca2":-1.030902481,"cluster":0},{"pca1":-2.2240765106,"pca2":-0.6755959076,"cluster":0},{"pca1":-2.4198247733,"pca2":-1.2548144049,"cluster":0},{"pca1":-2.5226118069,"pca2":-0.4618114064,"cluster":0},{"pca1":0.0979443972,"pca2":-2.6276452074,"cluster":0},{"pca1":-2.3113803442,"pca2":0.0658651107,"cluster":0},{"pca1":-1.6384293997,"pca2":-0.4691096832,"cluster":0},{"pca1":-1.4490191906,"pca2":-0.3013221252,"cluster":0},{"pca1":-2.3823564721,"pca2":-0.8743425609,"cluster":0},{"pca1":-2.5211422292,"pca2":-0.5693020978,"cluster":0},{"pca1":-2.3379742393,"pca2":-1.2858994313,"cluster":0},{"pca1":-2.3785138915,"pca2":-0.5820626026,"cluster":0},{"pca1":-2.4632657436,"pca2":-0.7687637466,"cluster":0},{"pca1":-1.7335470478,"pca2":0.4249767585,"cluster":0},{"pca1":-1.4192770169,"pca2":0.2726485049,"cluster":0},{"pca1":-1.3490040131,"pca2":0.4140380275,"cluster":0},{"pca1":-1.2131382454,"pca2":-0.0661668138,"cluster":0},{"pca1":-1.6295450922,"pca2":-0.3506500759,"cluster":0},{"pca1":-2.4169338629,"pca2":-0.2540032682,"cluster":0},{"pca1":-1.4902817268,"pca2":0.4437693468,"cluster":0},{"pca1":-2.5049715375,"pca2":-0.8225287423,"cluster":0},{"pca1":-2.2645466695,"pca2":-1.1204644045,"cluster":0},{"pca1":-1.4723823385,"pca2":-1.0469585229,"cluster":0},{"pca1":3.6083367605,"pca2":-1.9432357151,"cluster":1},{"pca1":3.4668285016,"pca2":-2.3199135274,"cluster":1},{"pca1":3.5554195781,"pca2":-2.2825114437,"cluster":1},{"pca1":2.8231989888,"pca2":-1.8236236891,"cluster":1},{"pca1":3.6320586739,"pca2":-1.8055058505,"cluster":1},{"pca1":3.7185774798,"pca2":-2.5127763946,"cluster":1},{"pca1":2.9017724114,"pca2":-1.8027177925,"cluster":1},{"pca1":4.5160919924,"pca2":-0.3050758789,"cluster":1},{"pca1":3.671822303,"pca2":-2.2949446661,"cluster":1},{"pca1":4.4683422879,"pca2":-0.3958914272,"cluster":1},{"pca1":4.2834450476,"pca2":-0.3748976377,"cluster":1},{"pca1":4.4202124843,"pca2":-0.4109105278,"cluster":1},{"pca1":3.695535484,"pca2":-2.1923399741,"cluster":1},{"pca1":3.7481223138,"pca2":-2.300917918,"cluster":1},{"pca1":4.4869382627,"pca2":0.3031553578,"cluster":1},{"pca1":1.8717084647,"pca2":-2.7222799851,"cluster":1},{"pca1":2.2589189581,"pca2":-1.0338232939,"cluster":1},{"pca1":3.4901795104,"pca2":-2.1729260584,"cluster":1},{"pca1":3.5596453318,"pca2":-0.0358301586,"cluster":1},{"pca1":3.8798008916,"pca2":-2.2240913663,"cluster":1},{"pca1":3.5784348777,"pca2":-2.3336176836,"cluster":1},{"pca1":1.1018991341,"pca2":-2.4201159604,"cluster":1},{"pca1":2.8216165647,"pca2":-2.0681080497,"cluster":1},{"pca1":3.5280370727,"pca2":-2.6624953791,"cluster":1},{"pca1":3.4723735736,"pca2":-2.5822051281,"cluster":1},{"pca1":3.4431867712,"pca2":-1.2147137091,"cluster":1},{"pca1":4.2051109162,"pca2":-0.9542039355,"cluster":1},{"pca1":4.1471970143,"pca2":-0.4033403557,"cluster":1},{"pca1":3.5044717127,"pca2":-2.4637048712,"cluster":1},{"pca1":1.9019665816,"pca2":-2.5358617613,"cluster":1},{"pca1":3.3836802565,"pca2":-1.0456576797,"cluster":1},{"pca1":4.0321463942,"pca2":-1.5205398837,"cluster":1},{"pca1":3.4953128461,"pca2":-1.919665281,"cluster":1},{"pca1":3.5916152827,"pca2":-2.013441613,"cluster":1},{"pca1":3.5533655663,"pca2":-2.3400127207,"cluster":1},{"pca1":4.0669987184,"pca2":-0.6067456341,"cluster":1},{"pca1":3.5680082968,"pca2":-2.324010912,"cluster":1},{"pca1":3.6786155773,"pca2":-1.9347078038,"cluster":1},{"pca1":4.5160817709,"pca2":0.0967084238,"cluster":1},{"pca1":3.8511864347,"pca2":0.2929677943,"cluster":1},{"pca1":4.5563400567,"pca2":0.3309942886,"cluster":1},{"pca1":4.0213806236,"pca2":-1.4337404278,"cluster":1},{"pca1":2.5514641865,"pca2":0.0700426636,"cluster":1},{"pca1":1.8480484204,"pca2":-2.41262921,"cluster":1},{"pca1":3.4979825334,"pca2":-2.5315277904,"cluster":1},{"pca1":4.4350014916,"pca2":-0.6841448298,"cluster":1},{"pca1":4.2665693774,"pca2":-0.7869368852,"cluster":1},{"pca1":3.576096147,"pca2":-2.5670072521,"cluster":1},{"pca1":2.84430792,"pca2":-1.9694985942,"cluster":1},{"pca1":3.6834785829,"pca2":-1.7154829857,"cluster":1},{"pca1":3.5638537153,"pca2":-2.6405448312,"cluster":1},{"pca1":3.988278057,"pca2":1.2895820196,"cluster":2},{"pca1":4.5392715321,"pca2":0.8993602524,"cluster":2},{"pca1":5.6392174651,"pca2":2.8819639205,"cluster":2},{"pca1":5.2077300632,"pca2":1.1901304318,"cluster":2},{"pca1":5.5016829291,"pca2":2.5631783649,"cluster":2},{"pca1":1.770918889,"pca2":3.0581958692,"cluster":2},{"pca1":2.5375670053,"pca2":3.2026074276,"cluster":2},{"pca1":2.2128657693,"pca2":4.7518764347,"cluster":2},{"pca1":5.5577245063,"pca2":3.1900427489,"cluster":2},{"pca1":2.2416089289,"pca2":4.9168470821,"cluster":2},{"pca1":5.6405673722,"pca2":2.7334671257,"cluster":2},{"pca1":2.102398327,"pca2":5.1443825289,"cluster":2},{"pca1":5.5142513909,"pca2":3.0820628441,"cluster":2},{"pca1":5.7400368176,"pca2":2.9400980622,"cluster":2},{"pca1":2.0801225079,"pca2":4.5275444322,"cluster":2},{"pca1":5.6190076911,"pca2":2.3924635847,"cluster":2},{"pca1":4.7437916944,"pca2":0.6984232011,"cluster":2},{"pca1":4.7191341152,"pca2":0.7538337559,"cluster":2},{"pca1":5.6513432043,"pca2":2.5685314353,"cluster":2},{"pca1":5.5884430254,"pca2":2.8234210583,"cluster":2},{"pca1":4.582640045,"pca2":0.9621989408,"cluster":2},{"pca1":2.8231941305,"pca2":4.4985079365,"cluster":2},{"pca1":5.7533797594,"pca2":2.872508463,"cluster":2},{"pca1":5.2708753545,"pca2":1.5628630805,"cluster":2},{"pca1":5.4018906642,"pca2":2.6045252952,"cluster":2},{"pca1":4.7206708617,"pca2":0.7914037395,"cluster":2},{"pca1":4.9304146651,"pca2":0.9034643662,"cluster":2},{"pca1":5.7882943515,"pca2":2.4939359806,"cluster":2},{"pca1":4.8553498187,"pca2":0.6569459732,"cluster":2},{"pca1":5.6243443833,"pca2":2.8109078086,"cluster":2},{"pca1":2.2637511662,"pca2":4.8821088754,"cluster":2},{"pca1":5.5367160637,"pca2":2.7740276127,"cluster":2},{"pca1":4.6850655268,"pca2":0.7753688537,"cluster":2},{"pca1":5.2305178495,"pca2":1.1120276505,"cluster":2},{"pca1":5.1210137013,"pca2":1.5398367833,"cluster":2},{"pca1":2.2692358797,"pca2":8.0364484927,"cluster":2},{"pca1":4.3089089605,"pca2":0.7318895358,"cluster":2},{"pca1":5.5406037814,"pca2":3.0429652912,"cluster":2},{"pca1":5.4742313186,"pca2":2.6442697198,"cluster":2},{"pca1":4.6523564132,"pca2":0.7111742333,"cluster":2},{"pca1":5.5917928492,"pca2":2.8266531124,"cluster":2},{"pca1":4.5409894424,"pca2":0.8144385626,"cluster":2},{"pca1":5.103171169,"pca2":1.0177242804,"cluster":2},{"pca1":5.1119623893,"pca2":1.0395676599,"cluster":2},{"pca1":4.8014549816,"pca2":0.7672300778,"cluster":2},{"pca1":2.0373357031,"pca2":4.3690741578,"cluster":2},{"pca1":2.0449770433,"pca2":4.7921389664,"cluster":2},{"pca1":4.740234596,"pca2":0.465079166,"cluster":2},{"pca1":4.6285519752,"pca2":0.5882912689,"cluster":2},{"pca1":4.7093546394,"pca2":0.8022549107,"cluster":2},{"pca1":-0.5134613387,"pca2":4.0335352549,"cluster":3},{"pca1":1.188185964,"pca2":2.9316428964,"cluster":3},{"pca1":-0.8440721946,"pca2":3.3847413698,"cluster":3},{"pca1":-0.7316413555,"pca2":3.1102297345,"cluster":3},{"pca1":1.6875576282,"pca2":3.0408191457,"cluster":3},{"pca1":-1.3248384192,"pca2":2.5827983887,"cluster":3},{"pca1":-1.0955732299,"pca2":1.7336593136,"cluster":3},{"pca1":-1.5594715421,"pca2":3.5693631072,"cluster":3},{"pca1":-2.7024071081,"pca2":1.2970374427,"cluster":3},{"pca1":1.1907563255,"pca2":2.9398166868,"cluster":3},{"pca1":-1.108658937,"pca2":1.5091425846,"cluster":3},{"pca1":-0.0990614437,"pca2":2.6833080866,"cluster":3},{"pca1":1.1901127958,"pca2":2.1953246444,"cluster":3},{"pca1":0.828445321,"pca2":1.0783062154,"cluster":3},{"pca1":-2.661248457,"pca2":1.2929807196,"cluster":3},{"pca1":1.1867127701,"pca2":2.819225717,"cluster":3},{"pca1":-1.0380027417,"pca2":2.6663368176,"cluster":3},{"pca1":-1.080589951,"pca2":1.4636016909,"cluster":3},{"pca1":-1.2044268711,"pca2":1.4746589655,"cluster":3},{"pca1":-1.0955790132,"pca2":1.8928174173,"cluster":3},{"pca1":0.6262762943,"pca2":0.8075089253,"cluster":3},{"pca1":-1.2961421346,"pca2":1.0222370374,"cluster":3},{"pca1":-2.1265561186,"pca2":3.5360471458,"cluster":3},{"pca1":-0.6208971806,"pca2":0.7403725655,"cluster":3},{"pca1":-1.3406940893,"pca2":2.0092299274,"cluster":3},{"pca1":-1.3064513317,"pca2":1.4442992168,"cluster":3},{"pca1":-1.3692269385,"pca2":2.8532378197,"cluster":3},{"pca1":-1.0753373802,"pca2":1.5494765562,"cluster":3},{"pca1":-1.3792699965,"pca2":1.8215331561,"cluster":3},{"pca1":-1.0284815078,"pca2":3.0399895069,"cluster":3},{"pca1":-0.9439202574,"pca2":1.9031897861,"cluster":3},{"pca1":-0.9026158647,"pca2":3.1097443489,"cluster":3},{"pca1":0.9509163463,"pca2":1.6625306625,"cluster":3},{"pca1":-1.0049126793,"pca2":1.7154354548,"cluster":3},{"pca1":1.425484878,"pca2":1.864236393,"cluster":3},{"pca1":-1.4149052031,"pca2":1.01755625,"cluster":3},{"pca1":-1.1968049885,"pca2":2.1374104626,"cluster":3},{"pca1":1.2036631294,"pca2":2.6274092404,"cluster":3},{"pca1":-1.6256628411,"pca2":3.4241284328,"cluster":3},{"pca1":-0.8604439821,"pca2":2.2046910644,"cluster":3},{"pca1":-2.4129837116,"pca2":1.7518846745,"cluster":3},{"pca1":-1.5716031285,"pca2":1.1822024802,"cluster":3},{"pca1":-2.4927456597,"pca2":2.1128304515,"cluster":3},{"pca1":-1.2179960869,"pca2":1.4585496981,"cluster":3},{"pca1":-0.956989629,"pca2":1.9091802719,"cluster":3},{"pca1":-1.1472068162,"pca2":2.3674241319,"cluster":3},{"pca1":1.6212774785,"pca2":2.8034119735,"cluster":3},{"pca1":-0.0246249877,"pca2":2.4925752823,"cluster":3},{"pca1":1.2320499091,"pca2":3.0623523162,"cluster":3},{"pca1":-1.2115101643,"pca2":1.4643831799,"cluster":3}];
+// Histogram samples (internal 0-indexed)
+const HIST={0:[245,177,204,329,322,47,257,139,154,138,188,207,25,35,98,125,82,175,5,87,89,61,100,-23,84,119,214,78,103,13,40,16,34,212,252,183,186,102,100,-24,25,131,32,84,20,141,35,293,165,24,141,0,55,-17,27,91,280,22,129,184,73,266,202,56,293,288,-3,181,11,295,289,316,38,181,186,241,83,-15,14,294,0,219,188,55,109,290,106,10,347,6,249,292,180,223,23,72,185,305,-7,302,145,166,265,170,-9,51,183,24,149,162,223,-3,49,42,364,206,33,105,-26,224,33,26,152,165,-22,26,65,43,-9,118,345,187,176,4,210,30,-12,48,161,149,253,98,297,254,360,47,61,79,82,161,200,2,201,89,191,178,24,33,308,80,351,68,22,90,163,1,94,189,172,287,13,153,210,98,27,12,145,5,43,-23,-1,313,325,105,75,196,30,80,124,-5,215,175,-26,115,45,68,27,217,293,352,309,294,143,181,97,71,-21,88,97,263,230,180,1,160,106,34,-3,-14,306,46,321,84,285,312,160,257,13,200,166,339,293,88,294,9,182,28,279,315,233,-8,90,133,181,-10,216,94,62,-8,4,155,284,143,-2,280,278,33,312,290,280,-8,90,74,168,95,363,283,41,268,40,299,91,-20,194,308,253,14,28,308,53,134,211,56,153,47,113,105,354,281,227,293,-49,314,59,330,44,-14,352,273,54,-22,89,190,86,234,264,347,22,303,97,259,120,308,9,281,70,7,90,204,-3,229,308,319,164,216,332,133,279,303,132,189,202,66,325,288,50,48,44,20,205,32,-29,54,250,13,159,265,47,0,141,110,263,294,231,12,-27,298,4,199,202,116,320,0,215,325,203,12,57,4,294,317,93,4,35,156,56,206,74,220,129,110,180,253,4,48,248,277,202,-8,11,313,5,342,-8,258,51,25,198,20,293,116,-8,251,279,34,54,-20,51,65,98,76,6,11,-20,-8,159,302,35,364,15,63,30,55,253,195,85,1,260,6,110,89,325,228,0,107,-26,76,292,101,56,43,14,256,44,44,87,-7,268,64,-3,44,214,22,200,20,167,105,125,158,131,261,183,195,-11,0,135,12,166,83,23,111,193,60,-3,-19,111,55,327,26,77,210,18,-61,166,32,118,29,278,43,90,263,154,154,-3,202,144,35,349,8,44,319,38,79,216,223,304,261,19,91,204,187,184,-15,238,292,101,98,56,54,274,33,266,69,180,10,109,35,66,198,198,84,323,116,206,-8,145,163,29,188,58,28,79,300,6,96,200,0,200,111,46,262,91,93,309,99,175,13,349,22,268,41,35,108,344,323,25,163,221,28,191,62,312,279,134,111,47,63,229,242,156,279,24,54,108,4,364,45,14,280,225,27,204,300,206,155,-27,-20,56,322,319,14,264,162,-21,75,309,196,217,182,223,279,48,198,261,63,153,-35,-8,18,194,259,-37,226,97,0,50,-19,127,210,323,16,320,24,35,299,253,270,-15,144,262,302,172,294,118,208,193,176,-9,20,285,21,330,14,324,70,77,-38,153,-3,0,38,363,-32,205,190,97,313,236,46,35,312,4,-2,123,124,27,294,175,330,276,36,286,-10,91,315,295,187,11,319,205,-17,105,330,287,13,179,291,155,91,17,107,321,360,274,95,136,260,338,201,271,286,30,67,312,118,181,11,73,157,183,17,342,166,286,290,280,3,19,0,258,82,6,63,27,-28,19,-7,221,-16,28,261,76,296,12,44,162,39,21,290,102,14,208,206,35,-22,122,219,257,279,283,293,212,82,237,290,40,98,120,314,62,317,210,323,40,136,270,243,259,276,314,-14,180,239,219,152,228,212,124,49,34,0,278,204,281,127,199,-1,237,27,30,318,280,4,13,237,15,135,303,279,183,15,-15,167,186,126,335,272,14,281,155,49,14,55,323,35,64,172,38,320,289,294,158,201,83,25,-7,29,163,300,230,159,261,31,293,17,308,120,344,85,56,196,15,212,180,47,115,184,34,208,40,125,255,252,91,136,90,-31,135,-21,215,-21,48,298,-8,-4,4,1,131,288,192,63,74,223,219,96,68,199,315,96,90,-15,165,-3,-14,298,-1,332,105,95,187,0,27,128,8,48,123,124,-1,117,95,79,244,264,2,56,297,41,189,196,318,159,84,84,50,12,21,196,26,185,48,349,315,126,180,-3,-52,65,281,148,60,224,13,48,361,100,282,152,128,40,317,91,64,211,132,287,124,6,3,0,7,102,257,291,284,-21,80,15,56,17,154,104,21,28,14,0,-35,272,-16,82,85,168,223,21,138,222,311,294,24,95,280,118,69,287,63,28,41,121,-8,314,243,32,279,111,240,13,7,6,8,154,20,34,209,89,139,83,80,206,152,250,166,24,160,14,76,274,6,30,364,77,191,8,190,254,188,154,-21,118,2,315,138,320,87,23,3,254,0,324,118,252,131,162,-31,319,-16,120,216,25,82,-49,218,195,84,195,307,13,215,116,74,293,25,235,29,4,-9,38,126,147,265,206,17,13,113,261,75,15,75,186,22,-11,90,104,-32,149,295,56,69,13,224,210,263,229,259,33,115,161,47,-25,-25,264,71,180,81,97,-29,7,18,8,53,-8,277,20,89,90,138,181,98,8,191,-3,59,255,-9,312,171,116,181,145,282,1,72,217,232,303,35,288,21,289,172,63,106,20,-17,277,18,124,10,-25,19,55,56,167,264,271,116,241,14,160,91,84,197,71,298,230,167,270,30,13,203,118,305,11,266,36,298,8,4,1,5,324,194,343,19,-7,127,105,46,122,273,-1,-15,-8,325,-10,-30,39,218,215,319,43,276,339,193,313,122,226,204,209,190,360,88,294,-36,45,55,160,11,268,320,34,-10,303,12,9,204,204,-21,202,55,305,85,4,46,189,301,75,197,48,272,207,358,122,208,144,304,-8,207,43,-1,4,314,177,313,190,178,82,0,38,237,27,17,68,-3,294,5,117,170,306,-14,189,-2,229,48,-3,75,336,50,13,264,118,27,258,97,339,305,149,17,229,60,316,19,95,226,230,176,97,279,34,167,70,-18,239,45,38,217,169,321,6,197,212,267,161,137,59,267,-23,13,43,208,156,85,276,239,85,111,299,1,15,33,205,10,154,262,56,204,236,20,306,25,151,-26,258,-16,82,54,125,-7,239,92,33,26,222,307,55,-1,205,327,285,20,357,208,225,90,221,119,273,38,-12,178,21,296,167,21,10,15,-9,1,50,297,267,-36,324,265,5,105,20,202,52,333,70,206,288,280,222,130,53,303,254,28,85,27,5,118,313,348,-37,12,72,108,261,315,306,-20,19,73,83,-29,15,39,301,35,5,145,55,276,106,96,324,280,58,2,175,295,221,80,116,271,14,231,59,104,-32,195,284,9,289,4,7,138,210,24,315,120,320,99,291,116,63,-30,127,229,-6,-8,267,119,0,81,77,188,294,217,356,312,310,211,203,308,172,42,18,113,140,217,209,-8,28,322,15,103,152,5,280],
+1:[177,325,143,108,165,64,280,78,190,129,179,141,96,293,99,34,130,300,25,280,172,237,305,213,205,203,146,7,87,323,189,323,278,39,29,40,44,25,298,75,290,32,21,280,180,225,42,47,33,45,307,111,12,186,59,154,248,15,263,181,151,331,12,14,84,60,276,66,325,35,204,12,5,78,341,283,20,319,64,72,106,135,49,139,226,160,54,14,300,208,43,72,265,35,23,244,170,39,22,74,324,104,27,87,125,14,231,65,56,162,280,235,324,187,88,69,123,14,51,10,222,76,315,289,20,334,56,58,75,63,92,77,7,7,147,325,215,48,169,42,181,131,270,32,28,73,20,248,37,224,184,49,298,226,279,323,197,90,140,273,98,93,47,58,183,339,155,140,39,201,229,147,41,84,294,50,363,19,9,97,112,115,123,22,156,35,177,83,137,259,113,73,69,302,259,18,49,174,4,304,62,104,223,323,166,231,62,117,217,222,22,316,74,332,61,44,171,279,153,10,197,167,317,284,216,113,94,327,6,90,4,323,87,320,66,322,245,205,334,26,208,44,36,350,85,338,4,40,11,17,41,266,186,189,174,177,355,77,300,90,90,231,86,79,182,26,93,85,189,277,39,303,50,22,54,62,54,364,140,52,33,84,175,282,284,331,298,55,26,84,255,53,172,162,6,276,346,296,83,224,314,111,297,229,17,156,203,156,275,147,49,66,315,157,223,20,15,36,68,27,263,24,10,144,178,39,22,323,78,77,151,146,50,180,268,22,276,19,20,274,42,301,106,173,49,0,287,159,18,325,40,229,31,14,139,5,178,208,260,113,21,329,303,32,27,337,211,56,116,49,26,28,66,201,304,78,99,109,55,104,72,336,122,21,53,74,89,0,294,58,34,237,312,171,81,37,282,220,284,29,277,22,76,166,77,305,97,139,68,124,272,12,74,324,338,198,96,69,111,54,33,117,173,30,27,14,339,61,317,71,26,225,141,4,18,254,141,101,71,172,14,115,164,326,266,56,126,316,107,4,41,224,80,28,322,109,47,188,54,40,106,70,175,56,284,11,221,296,294,166,10,324,174,6,310,186,279,60,41,71,21,110,26,78,12,43,162,227,97,28,198,24,315,51,29,248,127,91,221,259,41,104,31,217,20,60,303,73,129,285,324,323,21,12,124,314,224,171,119,38,6,328,172,270,49,171,18,162,286,24,99,364,197,20,64,190,14,39,99,307,196,63,292,57,296,46,70,51,15,35,17,11,292,218,338,194,345,284,264,54,324,7,336,11,238,77,156,104,238,167,31,229,34,0,264,12,47,242,217,248,110,35,333,174,21,31,20,84,70,258,4,122,18,111,321,37,45,188,223,202,95,42,90,27,259,268,41,319,33,181,100,160,123,24,107,90,46,225,40,105,92,183,91,294,49,83,56,106,222,33,23,33,274,210,77,310,177,44,271,60,311,263,177,168,32,32,184,31,14,188,177,65,12,295,159,344,26,222,298,195,125,49,266,32,117,92,132,197,305,30,133,24,174,103,70,52,168,246,246,276,169,190,33,181,20,255,103,268,248,299,122,200,120,30,44,33,18,97,181,21,57,49,101,265,315,73,51,217,77,219,27,82,179,34,11,60,129,172,68,33,76,259,38,104,17,36,10,325,237,299,220,184,41,10,47,117,329,81,105,77,155,173,14,2,29,216,187,7,81,29,13,155,308,131,329,53,146,42,36,150,245,300,88,146,173,169,11,124,14,27,289,205,313,315,334,83,131,209,279,17,94,147,46,82,325,77,189,174,90,63,53,18,28,26,93,34,76,303,18,195,276,78,314,344,191,76,306,26,139,43,230,54,7,81,33,68,57,36,283,13,251,41,85,182,26,304,28,12,48,117,14,208,39,268,279,213,15,21,335,293,21,39,18,311,96,9,162,271,31,96,21,288,135,182,209,293,313,7,14,147,85,248,189,350,105,22,165,276,201,87,8,21,34,147,194,281,33,267,144,85,19,80,205,14,118,21,126,8,149,56,96,155,114,152,35,29,77,60,43,218,29,336,168,21,331,13,316,218,288,17,40,312,84,260,89,42,61,168,188,100,21,309,45,152,232,35,303,93,321,140,21,22,40,174,263,56,69,185,117,205,110,329,54,304,176,9,166,24,141,74,323,27,181,20,278,353,160,93,74,133,176,318,347,34,260,85,53,46,264,63,271,8,14,30,90,51,100,108,259,170,211,327,279,88,8,42,81,25,80,109,109,182,96,18,208,38,125,29,14,284,145,336,22,13,8,12,344,139,142,25,4,5,183,35,124,36,329,83,60,189,117,89,84,206,158,35,177,70,41,300,245,305,161,60,315,96,14,317,47,154,53,54,133,62,339,209,92,298,34,299,23,11,97,45,137,174,132,7,81,57,153,340,275,357,335,29,27,227,270,34,223,83,162,118,127,146,28,73,20,31,216,26,17,74,177,138,81,337,85,43,83,143,24,178,66,185,221,301,109,50,267,65,269,78,104,93,264,50,13,173,290,49,87,14,182,325,76,281,30,294,329,90,6,168,195,162,89,176,26,68,45,32,56,355,182,302,324,162,35,217,28,159,323,124,336,294,25,6,315,184,29,117,22,274,62,290,49,35,313,265,245,3,28,15,362,90,98,190,99,303,20,257,300,37,206,48,165,5,56,68,14,55,11,319,88,40,205,15,62,109,210,257,218,97,290,327,70,316,111,163,17,26,294,21,139,66,94,112,309,285,323,75,97,324,46,317,32,0,36,330,283,203,48,168,181,14,20,280,356,129,88,181,329,18,257,35,305,286,320,96,291,259,14,18,137,53,191,49,2,174,181,289,170,11,329,55,24,322,182,98,207,56,174,215,230,148,131,319,115,86,64,14,108,288,0,108,117,28,258,99,52,77,41,355,56,169,223,12,52,6,315,8,283,166,34,65,267,103,211,285,150,285,266,223,97,212,293,241,143,98,7,231,361,179,27,299,51,40,146,6,182,224,339,21,291,336,76,21,323,354,10,39,103,203,237,318,22,108,197,111,124,157,298,102,194,134,321,12,54,63,189,4,44,160,176,165,84,32,341,139,36,253,363,55,50,34,190,26,164,106,29,309,80,355,106,295,137,164,6,172,145,13,17,346,27,43,83,153,132,21,200,41,24,297,46,34,324,41,89,57,22,88,7,28,104,88,128,81,304,112,106,362,31,82,272,33,80,161,315,28,230,87,85,35,123,73,28,301,239,337,284,65,182,76,344,198,49,41,48,229,94,21,17,192,56,130,78,98,31,137,78,79,99,112,17,143,83,39,202,14,337,101,29,129,76,317,60,151,5,119,97,205,5,104,42,74,215,297,54,165,28,196,85,178,9,101,272,121,127,187,181,201,41,4,200,99,29,231,21,36],
+2:[-7,281,138,282,-29,303,32,110,25,95,195,162,86,-4,71,350,20,326,168,285,12,116,56,348,279,309,280,356,139,187,252,43,253,147,289,211,282,188,-3,338,-21,84,215,278,20,28,-9,101,272,124,143,49,278,-17,98,-29,324,9,-10,103,9,42,88,136,207,42,-6,204,84,177,58,300,131,98,203,140,270,265,210,296,167,278,-54,34,313,-19,99,320,323,86,63,0,10,41,343,257,77,-29,195,266,15,322,144,302,37,296,4,15,350,5,157,50,44,298,111,110,121,263,23,151,136,206,45,56,120,68,-14,171,91,267,83,-16,0,155,23,322,249,7,259,-17,305,224,148,88,-19,270,302,190,308,4,119,207,313,289,114,286,1,284,308,126,72,1,170,163,96,133,316,222,251,301,-26,316,176,5,54,323,278,269,276,260,275,217,76,233,-36,257,44,356,315,39,14,87,287,27,156,34,25,117,176,82,356,95,258,273,328,362,297,88,129,-35,279,271,324,325,36,261,279,33,90,325,155,8,203,147,285,98,140,169,108,252,83,15,121,37,312,281,185,343,338,288,347,94,-16,167,125,315,297,218,223,233,325,279,48,303,20,293,21,219,6,161,8,175,78,-11,265,21,314,37,32,46,182,129,-8,312,272,19,45,316,51,323,264,48,208,78,121,-8,325,-22,202,-37,301,299,166,-29,309,122,295,6,296,-14,34,300,52,181,251,-2,10,330,107,207,14,42,91,142,56,-14,214,10,68,210,301,226,166,195,200,-51,11,20,-8,118,217,86,30,365,1,110,-5,209,153,271,268,338,264,206,168,99,59,-21,13,145,-21,24,125,225,316,10,240,132,65,276,252,302,260,-12,-31,225,295,361,322,36,50,273,258,239,255,301,318,364,349,33,23,56,-13,-21,88,155,-19,220,159,361,4,216,142,331,35,25,181,190,-1,81,306,75,298,18,268,336,261,68,92,279,141,25,56,42,25,222,313,-38,111,-32,84,364,349,298,120,327,178,-6,302,274,-1,301,201,315,264,8,175,303,96,302,110,260,-16,204,232,17,326,217,176,87,325,-23,330,249,-11,108,1,61,364,113,208,221,341,12,249,321,204,-20,119,314,64,180,281,26,119,260,82,214,106,288,204,133,93,264,27,224,176,188,274,84,4,279,337,229,334,-2,173,223,148,89,231,141,290,149,274,213,78,294,71,-31,119,9,209,11,185,45,198,107,22,262,21,25,223,6,328,264,44,-29,264,68,309,305,15,0,4,204,190,8,49,15,316,28,261,68,264,264,324,-15,137,123,153,73,294,355,135,296,215,258,325,1,271,152,20,58,344,237,132,338,281,291,-23,126,6,92,62,293,2,-33,308,20,-37,204,202,49,255,-1,229,-29,53,14,106,147,6,315,149,-1,115,364,93,302,167,63,94,1,263,278,252,198,162,309,30,226,294,224,162,74,169,161,11,-3,245,148,176,358,125,40,207,75,151,95,89,237,19,263,228,308,257,302,236,55,56,356,96,200,247,51,-35,263,154,238,278,227,180,260,316,41,364,84,69,166,320,299,230,202,213,178,19,30,321,62,199,-22,63,324,219,105,146,66,73,288,300,204,298,11,100,277,321,309,260,319,13,293,316,-5,362,31,-1,-2,161,204,221,17,11,30,261,293,66,-39,363,92,203,112,12,120,83,197,242,49,84,217,14,38,257,338,183,-38,230,120,324,300,285,-48,199,12,145,30,28,94,79,289,34,309,190,341,86,212,315,264,69,260,102,186,108,215,54,29,-31,57,168,187,246,80,12,261,195,133,75,302,111,214,37,238,86,21,203,265,209,-18,136,279,237,24,18,2,24,2,54,140,195,-11,293,344,168,241,238,195,282,106,109,120,15,307,222,-19,281,34,146,308,343,284,299,362,15,103,89,112,282,61,144,29,332,314,316,313,238,-30,216,-23,258,169,260,217,204,112,262,211,-10,295,328,40,260,-32,281,-8,28,78,215,33,311,59,0,343,152,316,217,245,240,113,210,203,133,32,120,-35,223,60,314,14,-1,364,17,319,185,301,91,328,208,176,251,56,256,186,93,-13,259,72,338,211,355,46,108,210,46,-27,24,109,198,289,138,117,10,12,244,-14,22,31,-15,348,172,158,318,-2,198,202,-1,190,122,92,7,197,215,63,20,173,350,199,44,136,7,159,170,-8,-32,-11,50,181,160,-15,153,28,360,58,9,160,44,6,-18,325,166,89,150,12,140,95,330,16,0,30,22,127,4,251,260,-3,97,133,83,309,321,14,300,207,91,355,74,12,325,308,-10,113,264,274,14,214,180,13,256,279,260,143,98,145,35,29,295,12,355,25,22,256,8,8,285,78,344,76,121,184,270,280,168,2,262,279,241,207,223,313,324,300,257,364,0,-18,226,72,297,106,309,-29,14,89,229,325,25,355,37,162,304,132,325,31,301,263,-6,133,44,-8,6,91,119,-20,175,-13,-8,355,27,182,44,120,90,0,111,9,264,92,-10,257,90,264,293,118,83,58,185,84,301,41,124,-23,4,160,344,180,21,-14,251,14,21,82,132,-2,157,42,18,-18,147,18,292,324,75,201,187,316,-5,189,148,74,245,263,-36,175,0,182,28,55,174,31,64,231,3,-25,247,146,309,124,-10,29,-2,87,42,16,30,91,301,-46,276,364,125,178,148,210,69,257,-28,364,315,0,324,169,-21,69,-25,302,-42,31,-23,99,219,357,145,315,323,304,284,-23,266,251,13,-6,103,110,137,29,69,314,296,14,311,116,114,231,323,205,49,204,19,-37,-3,63,155,85,313,13,90,-2,300,80,58,204,40,142,89,355,165,103,345,0,22,74,260,266,273,4,23,304,8,290,26,146,39,34,325,101,301,111,40,225,327,264,170,44,49,28,343,138,1,104,-4,316,191,257,23,205,144,296,17,183,279,149,324,299,313,211,307,113,-8,-44,143,204,313,264,91,178,261,38,166,314,184,306,-22,212,44,23,252,318,230,38,307,42,-7,7,280,209,51,34,330,266,300,336,82,301,106,-8,310,224,264,197,34,173,63,142,302,295,231,287,83,198,269,211,312,138,257,45,227,153,301,17,0,241,184,-7,265,-17,273,9,186,252,195,312,131,204,356,-3,335,302,197,328,279,-10,312,247,173,82,92,33,364,204,110,364,-3,35,324,-21,29,301,-9,363,-2,258,71,207,312,120,107,324,20,148,302,21,41,306,317,14,86,316,181,90,80,138,212,223,33,79,1,90,321,95,215,106,-2,262,288,324,84,210,-25,28,-15,169,293,97,301,282,56,95,196,260,223,312,221,84,-1,323,141,174,168,173,310,339,9,1,91,103,3,164,254,105,209,160,62,178,223,306,300,42,88,79,309,108,138,15,1,237,20,62,142,325,159,323,118,203,80,314,217,187,284,107,197,302,175,245,55,230,-2,168,17,314,268,-21,288,348,306,264,210,260,211,8,68,84,27,99,89,279,38,-31,184,14,217,71,181,106,341,9,281,27,36,161,-35,217],
+3:[76,305,97,5,85,291,73,111,325,75,44,-2,97,5,159,82,-10,0,58,266,-16,345,309,8,229,21,18,274,-8,287,-43,15,112,123,-2,204,-20,6,214,-9,292,33,15,-4,107,174,265,47,133,140,267,-1,26,220,364,154,281,2,-5,265,229,-44,-22,152,319,349,135,253,22,-14,124,17,-8,238,183,322,170,316,-16,230,3,-19,218,17,329,75,47,117,15,14,87,115,265,11,294,-22,67,238,-15,102,239,313,307,-2,210,274,272,-6,321,-3,4,-2,141,-3,215,84,127,321,265,111,0,0,-16,23,304,313,-17,147,168,322,300,87,-7,-10,175,3,220,280,62,3,51,308,-14,-7,206,281,293,296,-13,-28,84,178,-15,32,33,220,-7,139,-12,278,223,283,221,108,201,4,-34,78,-31,-35,-9,217,242,5,63,45,333,274,312,357,168,32,265,71,322,129,290,47,139,48,-11,156,257,179,-6,175,297,45,127,39,264,-8,193,161,15,-9,12,107,-33,-14,65,147,28,71,4,39,1,307,1,-21,241,208,55,-18,144,363,-25,-2,-17,6,259,217,215,324,-9,9,54,56,-3,187,86,15,116,265,309,85,-14,95,-28,329,295,80,159,283,76,21,324,194,-27,6,0,40,144,6,17,118,142,11,12,301,-1,280,133,9,216,244,0,211,104,74,7,25,175,6,161,230,-2,91,99,132,124,307,308,277,-13,148,87,3,18,22,-1,221,1,19,172,317,-24,266,255,363,-14,150,-9,100,209,13,73,268,304,-16,-16,109,236,97,28,20,35,209,112,293,17,364,-6,229,195,24,70,278,-8,253,292,315,123,12,35,45,111,39,203,293,319,201,267,-11,251,10,98,32,-8,157,139,-15,291,189,111,330,-1,300,48,-11,289,4,314,5,214,10,13,14,6,98,34,-7,170,35,34,8,-23,0,307,0,-29,148,107,6,299,221,-12,299,0,219,235,-18,313,1,10,92,4,318,320,-8,325,251,231,9,293,81,123,-1,-10,208,-1,17,108,21,144,326,-7,319,324,73,-8,18,285,273,-32,21,-9,185,277,193,-7,69,334,-24,103,324,76,175,316,19,312,-2,264,106,51,273,315,305,13,325,-15,-6,4,285,250,17,192,37,-24,8,80,136,29,223,19,-13,13,54,156,6,85,167,276,68,272,81,276,330,10,315,-1,120,305,181,95,266,-16,-21,32,228,-8,182,118,70,308,-17,8,-1,68,126,300,252,102,89,98,-17,181,33,-8,6,53,78,201,127,80,204,57,20,78,308,280,319,-14,-22,22,8,-3,257,0,41,144,352,225,20,69,-2,262,303,74,6,6,1,90,97,-35,21,-10,-22,14,128,24,-1,252,-1,-2,4,169,271,329,-15,110,148,44,75,267,25,9,5,362,62,137,11,312,84,-1,-14,0,1,56,4,6,175,299,6,9,-29,46,285,48,268,161,4,28,323,35,8,290,73,7,162,325,337,18,25,266,279,116,5,342,267,92,93,302,62,211,-10,-14,11,291,10,302,206,0,337,-1,200,294,294,279,145,313,195,207,253,0,-1,-15,293,281,45,132,88,259,321,10,-31,74,10,338,35,239,145,-1,-6,56,96,310,357,23,105,1,14,248,138,106,34,151,71,338,42,98,280,118,0,180,273,2,32,271,48,280,-9,-6,-7,89,282,348,-14,-15,226,279,186,207,277,187,163,3,-16,3,112,156,229,40,165,174,4,-14,-3,81,119,173,-29,63,-5,271,364,36,292,226,302,-7,318,267,174,-3,-1,236,63,309,-3,-27,1,252,285,105,141,4,-16,285,-7,254,15,110,-2,123,94,-2,183,40,29,294,5,6,106,146,53,126,316,293,156,305,280,-15,95,32,182,5,224,-16,-2,34,323,261,48,-32,62,293,299,85,32,309,171,109,304,281,-16,321,237,267,209,-26,47,7,15,231,48,-15,3,18,198,40,-9,307,6,308,0,313,-2,20,284,11,325,113,84,91,266,163,-22,37,329,325,-1,209,328,36,-10,357,1,-3,151,78,46,32,310,4,29,-22,169,28,230,267,320,5,188,158,22,-1,9,62,149,153,4,300,-8,284,171,178,13,175,258,70,364,88,-15,90,-6,3,111,153,54,277,138,-13,15,324,46,-25,98,273,-6,94,27,-25,4,325,118,119,-1,224,-7,3,165,323,24,231,312,98,55,76,74,7,14,134,-18,330,69,41,151,12,2,136,-3,157,233,255,12,265,300,280,153,-16,6,133,62,-2,7,7,-28,0,45,227,278,-1,75,46,26,304,258,80,226,98,90,-5,321,206,-15,66,266,294,107,325,-8,117,171,336,-8,174,109,182,97,-7,141,-1,-16,39,34,17,75,109,-35,65,288,-28,272,19,-18,-14,36,272,34,116,120,13,-7,316,231,321,-23,197,0,51,155,12,-9,-36,-12,257,215,167,286,-12,-8,183,281,109,33,3,247,0,305,11,247,5,10,20,-6,56,157,-17,197,2,4,97,88,221,37,5,148,199,173,182,-10,116,75,-1,-7,-13,308,276,45,-1,313,156,1,126,266,-1,21,49,26,188,103,72,247,241,13,0,-23,218,-28,82,15,207,138,325,268,272,222,37,5,102,333,322,103,202,313,0,-11,5,1,-3,148,-8,9,-14,-9,13,223,99,299,153,-29,-21,264,95,283,28,217,337,9,2,70,305,10,-9,-8,8,104,25,-19,201,0,194,10,257,7,-9,0,0,168,250,136,301,-11,21,330,314,25,-26,193,9,247,4,266,14,330,-2,169,18,134,77,280,22,202,313,6,162,322,-21,226,4,150,81,22,286,334,0,125,216,-39,24,-7,129,274,92,-9,0,49,0,97,259,-9,121,279,-60,311,213,177,4,335,3,122,173,280,313,167,28,348,21,272,292,-21,274,263,263,211,167,13,139,-3,-8,241,3,62,321,313,69,268,-4,160,-1,1,-36,-23,278,14,56,-24,181,226,2,-21,216,-3,7,274,288,-31,201,268,-1,-4,2,193,362,-30,166,15,166,42,31,170,180,321,-8,88,-8,261,-5,83,240,11,29,-20,-1,127,268,70,123,-20,52,-11,84,300,0,-4,-5,-3,26,271,-1,4,192,-1,229,105,7,-16,290,327,-9,10,302,7,311,0,-8,12,322,247,282,113,279,224,62,0,-2,302,322,81,29,274,178,-10,4,-1,203,35,356,188,-50,61,282,306,177,174,278,0,141,211,84,15,306,-10,-23,294,49,-10,209,168,313,210,61,233,266,321,182,47,168,33,14,48,337,336,285,300,329,222,20,195,32,64,48,287,188,-8,-21,190,203,-9,88,291,61,5,0,279,214,101,143,260,286,-15,224,8,172,-17,20,-4,62,21,22,33,62,307,-28,197,170,100,0,305,180,-24,353,1,-8,97,112,29,7,187,235,134,-8,96,131,0,4,0,-13,331,-12,240,82,-3,217,8,211,-39,-21,285,5,0,218,-7,5,-9,118,-7,292,3,-2,1,304,321,14,-8,187,301,330,112,301,83,223,279,104,70,14,184,124,276,121,40,15,61,158,3,43,177,295,292,266,290,-8,104,-35,329,-22,-4,6,214,49,154,166,315,2,272,147,81,268,-6,160,172,0,321,22,192,97,147,329,6]};
+
+let activeC=null;
+function init(){buildPropBar();buildCards();buildScatter();showOverview();}
+
+function buildPropBar(){
+  const bar=document.getElementById('prop-bar');
+  const leg=document.getElementById('prop-legend');
+  META.forEach((m,i)=>{
+    const pct=m.n/TOTAL*100;
+    const seg=document.createElement('div');
+    seg.className='pseg';seg.dataset.ci=i;
+    seg.style.width=pct+'%';seg.style.background=COLORS[i];
+    seg.innerHTML=pct>8?`<span>C${m.d} ${m.pct}</span>`:'';
+    seg.addEventListener('mouseenter',e=>{highlightC(i);showTip(e,`Cluster ${m.d}: ${m.title}\n${m.n.toLocaleString()} applicants (${m.pct})`);});
+    seg.addEventListener('mousemove',moveTip);
+    seg.addEventListener('mouseleave',()=>{resetHL();hideTip();});
+    seg.addEventListener('click',()=>showDetail(i));
+    bar.appendChild(seg);
+    const li=document.createElement('div');li.className='pleg';
+    li.innerHTML=`<div class="pleg-dot" style="background:${COLORS[i]}"></div>Cluster ${m.d} — ${m.title}`;
+    li.addEventListener('mouseenter',()=>highlightC(i));li.addEventListener('mouseleave',()=>resetHL());
+    li.addEventListener('click',()=>showDetail(i));leg.appendChild(li);
+  });
+}
+
+function showOverview(){
+  document.getElementById('overview').classList.add('active');
+  document.getElementById('detail').classList.remove('active');
+  document.getElementById('bc-sep').style.display='none';
+  document.getElementById('bc-cl').style.display='none';
+  resetHL();
+}
+function showDetail(ci){
+  document.getElementById('overview').classList.remove('active');
+  document.getElementById('detail').classList.add('active');
+  document.getElementById('bc-sep').style.display='';
+  const bc=document.getElementById('bc-cl');bc.style.display='';
+  bc.textContent=`Cluster ${META[ci].d} — ${META[ci].title}`;
+  renderDetail(ci);window.scrollTo(0,0);
+}
+
+function buildScatter(){
+  const svg=d3.select('#pca-svg');
+  const cont=document.getElementById('pca-panel');
+  function draw(){
+    svg.selectAll('*').remove();
+    const w=Math.max(260,cont.clientWidth-56),h=Math.max(160,cont.clientHeight-84);
+    svg.attr('viewBox',`0 0 ${w} ${h}`);
+    const p=22;
+    const xE=d3.extent(PCA_PTS,d=>d.pca1),yE=d3.extent(PCA_PTS,d=>d.pca2);
+    const xS=d3.scaleLinear().domain([xE[0]-.5,xE[1]+.5]).range([p,w-p]);
+    const yS=d3.scaleLinear().domain([yE[0]-.5,yE[1]+.5]).range([h-p,p]);
+    const gr=svg.append('g');
+    xS.ticks(4).forEach(t=>gr.append('line').attr('x1',xS(t)).attr('x2',xS(t)).attr('y1',p).attr('y2',h-p).attr('stroke','#e0dbd3').attr('stroke-width',1));
+    yS.ticks(4).forEach(t=>gr.append('line').attr('x1',p).attr('x2',w-p).attr('y1',yS(t)).attr('y2',yS(t)).attr('stroke','#e0dbd3').attr('stroke-width',1));
+    svg.append('g').selectAll('circle').data(PCA_PTS).join('circle')
+      .attr('cx',d=>xS(d.pca1)).attr('cy',d=>yS(d.pca2))
+      .attr('r',4).attr('fill',d=>COLORS[d.cluster]).attr('opacity',.5)
+      .attr('stroke',d=>COLORS[d.cluster]).attr('stroke-width',.5)
+      .attr('class',d=>`dot dc${d.cluster}`)
+      .on('mouseenter',(e,d)=>{highlightC(d.cluster);showTip(e,`Cluster ${META[d.cluster].d}: ${META[d.cluster].title}`);})
+      .on('mousemove',moveTip).on('mouseleave',()=>{resetHL();hideTip();});
+    [0,1,2,3].forEach(c=>{
+      const pts=PCA_PTS.filter(d=>d.cluster===c);
+      svg.append('text').attr('x',d3.mean(pts,d=>xS(d.pca1))).attr('y',d3.mean(pts,d=>yS(d.pca2))-10)
+        .attr('text-anchor','middle').attr('font-family','Georgia,serif')
+        .attr('font-size',9.5).attr('fill',CDARKS[c]).attr('font-weight','bold')
+        .text(`C${META[c].d}`);
+    });
+  }
+  draw();window.addEventListener('resize',draw);
+}
+
+function buildCards(){
+  const panel=document.getElementById('cards-panel');
+  META.forEach((m,i)=>{
+    const card=document.createElement('div');card.className='ccard';card.dataset.ci=i;
+    card.innerHTML=`<div class="card-hdr"><div class="card-cn">Cluster ${m.d}</div><div class="card-n">n = <span>${m.n.toLocaleString()}</span> &nbsp;·&nbsp; ${m.pct}</div></div><div class="card-title">${m.title}</div><div class="card-desc">${m.arch}</div><div class="card-cta">View Journey →</div>`;
+    card.addEventListener('mouseenter',()=>highlightC(i));card.addEventListener('mouseleave',()=>resetHL());
+    card.addEventListener('click',()=>showDetail(i));panel.appendChild(card);
+  });
+}
+
+function highlightC(ci){
+  activeC=ci;
+  document.querySelectorAll('.ccard').forEach(el=>{const ec=parseInt(el.dataset.ci);el.classList.toggle('highlighted',ec===ci);el.classList.toggle('dimmed',ec!==ci);});
+  document.querySelectorAll('.pseg').forEach(el=>{el.classList.toggle('dimmed',parseInt(el.dataset.ci)!==ci);});
+  document.querySelectorAll('.dot').forEach(el=>{const ec=parseInt(el.classList[1].replace('dc',''));d3.select(el).attr('opacity',ec===ci?.88:.06).attr('r',ec===ci?5.5:3);});
+}
+function resetHL(){
+  activeC=null;
+  document.querySelectorAll('.ccard').forEach(el=>el.classList.remove('highlighted','dimmed'));
+  document.querySelectorAll('.pseg').forEach(el=>el.classList.remove('dimmed'));
+  document.querySelectorAll('.dot').forEach(el=>d3.select(el).attr('opacity',.5).attr('r',4));
+}
+
+function renderDetail(ci){
+  const m=META[ci],col=COLORS[ci],dk=CDARKS[ci],dim=CDIMS[ci];
+  const b=document.getElementById('det-badge');b.textContent=m.d;b.style.background=dim;b.style.color=dk;b.style.border=`2px solid ${col}`;
+  document.getElementById('det-title').textContent=m.title;document.getElementById('det-title').style.color=dk;
+  document.getElementById('det-arch').textContent=`"${m.arch}"`;
+  document.getElementById('det-desc').textContent=m.desc;
+  const mr=document.getElementById('metrics-row');mr.innerHTML='';
+  const sr=(m.sib.yes/(m.sib.yes+m.sib.no)*100).toFixed(1);
+  [{label:'Cluster Size',value:m.n.toLocaleString(),sub:`${m.pct} of all applicants`},
+   {label:'Accepted',value:fp(m.funnel[1].n,m.n),sub:`${m.funnel[1].n.toLocaleString()} applicants`},
+   {label:'Enrolled',value:fp(m.funnel[3].n,m.n),sub:`${m.funnel[3].n.toLocaleString()} applicants`},
+   {label:'Sibling Enrolled',value:sr+'%',sub:`${m.sib.yes.toLocaleString()} applicants`}
+  ].forEach(met=>{const box=document.createElement('div');box.className='mbox';box.innerHTML=`<div class="mlabel">${met.label}</div><div class="mval" style="color:${dk}">${met.value}</div><div class="msub">${met.sub}</div>`;mr.appendChild(box);});
+  renderTimeline(ci);renderHistogram(ci);renderSibling(ci);
+}
+
+function renderTimeline(ci){
+  const m=META[ci],col=COLORS[ci],dk=CDARKS[ci];
+  const steps=m.funnel;
+  const cont=document.getElementById('tl-box');
+  const W=Math.max(480,cont.clientWidth-60),H=108;
+  const svg=d3.select('#tl-svg').attr('viewBox',`0 0 ${W} ${H}`);svg.selectAll('*').remove();
+  const n=steps.length,xs=steps.map((_,i)=>W/(n-1)*i),ly=50,maxN=steps[0].n;
+  for(let i=0;i<n-1;i++){
+    const ratio=maxN>0?steps[i+1].n/maxN:0;
+    svg.append('line').attr('x1',xs[i]).attr('y1',ly).attr('x2',xs[i+1]).attr('y2',ly)
+      .attr('stroke',col).attr('stroke-width',Math.max(1.5,ratio*7)).attr('opacity',.3+ratio*.6);
+  }
+  steps.forEach((step,i)=>{
+    const ratio=maxN>0?step.n/maxN:0,r=Math.max(5,ratio*13),x=xs[i];
+    svg.append('circle').attr('cx',x).attr('cy',ly).attr('r',Math.max(r,13))
+      .attr('fill','transparent').attr('cursor','pointer')
+      .on('mouseenter',e=>showTip(e,`${step.l}\n${step.n.toLocaleString()} applicants\n${fp(step.n,maxN)}`))
+      .on('mousemove',moveTip).on('mouseleave',hideTip);
+    svg.append('circle').attr('cx',x).attr('cy',ly).attr('r',r)
+      .attr('fill',ratio>0?col:'#d8d2c6').attr('stroke',ratio>0?dk:'#b0a898')
+      .attr('stroke-width',1.5).attr('opacity',ratio>0?.9:.35).attr('pointer-events','none');
+    svg.append('text').attr('x',x).attr('y',ly-r-7)
+      .attr('text-anchor','middle').attr('font-size',10.5).attr('font-family','Georgia,serif').attr('font-weight','bold')
+      .attr('fill',ratio>0?dk:'#b0a898').text(fp(step.n,maxN));
+    svg.append('text').attr('x',x).attr('y',ly+r+13)
+      .attr('text-anchor','middle').attr('font-size',9).attr('font-family','Georgia,serif')
+      .attr('letter-spacing','.04em').attr('fill','#4b5b68').text(step.l.toUpperCase());
+  });
+}
+
+function renderHistogram(ci){
+  const col=COLORS[ci],dk=CDARKS[ci],data=HIST[ci];
+  const svg=d3.select('#hist-svg');svg.selectAll('*').remove();
+  const W=Math.max(150,document.querySelector('#hist-svg').parentElement.clientWidth-38),H=185;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const pad={l:38,r:7,t:13,b:34};
+  const xS=d3.scaleLinear().domain([-70,375]).range([pad.l,W-pad.r]);
+  const bins=d3.bin().domain(xS.domain()).thresholds(20)(data);
+  const yS=d3.scaleLinear().domain([0,d3.max(bins,d=>d.length)]).range([H-pad.b,pad.t]);
+  svg.append('g').attr('transform',`translate(0,${H-pad.b})`).call(d3.axisBottom(xS).ticks(5).tickFormat(d=>d+'d'))
+    .call(g=>{g.select('.domain').attr('stroke','#d8d2c6');g.selectAll('line').attr('stroke','#d8d2c6');})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',9).attr('font-family','Georgia,serif'));
+  svg.append('g').attr('transform',`translate(${pad.l},0)`).call(d3.axisLeft(yS).ticks(4).tickFormat(d=>d3.format(',')(d)))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').attr('stroke','#e8e4dd');})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',9).attr('font-family','Georgia,serif'));
+  svg.selectAll('rect.b').data(bins).join('rect').attr('class','b')
+    .attr('x',d=>xS(d.x0)+1).attr('y',d=>yS(d.length))
+    .attr('width',d=>Math.max(0,xS(d.x1)-xS(d.x0)-2)).attr('height',d=>H-pad.b-yS(d.length))
+    .attr('fill',col).attr('opacity',.78).attr('rx',2)
+    .on('mouseenter',(e,d)=>showTip(e,`${d.x0}d – ${d.x1}d\n${d.length.toLocaleString()} applicants`))
+    .on('mousemove',moveTip).on('mouseleave',hideTip);
+  const med=d3.median(data);
+  svg.append('line').attr('x1',xS(med)).attr('x2',xS(med)).attr('y1',pad.t).attr('y2',H-pad.b)
+    .attr('stroke',dk).attr('stroke-width',1.5).attr('stroke-dasharray','4,3').attr('opacity',.7);
+  svg.append('text').attr('x',xS(med)+4).attr('y',pad.t+10)
+    .attr('font-size',8.5).attr('font-family','Georgia,serif').attr('fill',dk).text(`median ${Math.round(med)}d`);
+}
+
+function renderSibling(ci){
+  const svg=d3.select('#sib-svg');svg.selectAll('*').remove();
+  const W=Math.max(150,document.querySelector('#sib-svg').parentElement.clientWidth-38),H=185;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const pad={l:38,r:7,t:13,b:34};
+  const xS=d3.scaleBand().domain([0,1,2,3]).range([pad.l,W-pad.r]).padding(.3);
+  const yS=d3.scaleLinear().domain([0,1]).range([H-pad.b,pad.t]);
+  svg.append('g').attr('transform',`translate(0,${H-pad.b})`).call(d3.axisBottom(xS).tickFormat(d=>`C${META[d].d}`))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').remove();})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',10).attr('font-family','Georgia,serif'));
+  svg.append('g').attr('transform',`translate(${pad.l},0)`).call(d3.axisLeft(yS).ticks(4).tickFormat(d=>Math.round(d*100)+'%'))
+    .call(g=>{g.select('.domain').remove();g.selectAll('line').attr('stroke','#e8e4dd');})
+    .call(g=>g.selectAll('text').attr('fill','#4b5b68').attr('font-size',9).attr('font-family','Georgia,serif'));
+  META.forEach((cm,i)=>{
+    const rate=cm.sib.yes/(cm.sib.yes+cm.sib.no),isA=i===ci;
+    svg.append('rect').attr('x',xS(i)).attr('y',yS(rate))
+      .attr('width',xS.bandwidth()).attr('height',H-pad.b-yS(rate))
+      .attr('fill',COLORS[i]).attr('opacity',isA?.9:.26).attr('stroke',COLORS[i]).attr('stroke-width',isA?1.5:.5).attr('rx',3)
+      .on('mouseenter',e=>showTip(e,`Cluster ${cm.d}: ${cm.title}\nSibling enrolled: ${(rate*100).toFixed(1)}%\n${cm.sib.yes.toLocaleString()} of ${(cm.sib.yes+cm.sib.no).toLocaleString()}`))
+      .on('mousemove',moveTip).on('mouseleave',hideTip);
+    svg.append('text').attr('x',xS(i)+xS.bandwidth()/2).attr('y',yS(rate)-5)
+      .attr('text-anchor','middle').attr('font-size',9.5).attr('font-family','Georgia,serif')
+      .attr('fill',isA?CDARKS[i]:'#8a98a4').attr('font-weight',isA?'bold':'normal')
+      .text((rate*100).toFixed(1)+'%');
+  });
+}
+
+const tip=document.getElementById('tooltip');
+function showTip(e,txt){tip.innerHTML=txt.replace(/\n/g,'<br>');tip.style.opacity='1';if(e)moveTip(e);}
+function moveTip(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-8)+'px';}
+function hideTip(){tip.style.opacity='0';}
+function fp(n,total){if(!total||total===0)return'0%';if(n===0)return'0%';const v=n/total;if(v<0.001&&n>0)return'(<1%)';return Math.round(v*100)+'%';}
+
+init();
+</script>
+<div id="cluster-appendix-bar" style="padding:16px 48px;background:var(--surface);border-top:1px solid var(--border);font-family:Georgia,serif;">
+  <a href="appendix_cluster.html" style="font-size:.8rem;color:#2c5f8a;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">&#128196; Methodology Appendix &nearr;</a>
+</div>
+</body>
+</html>
