@@ -42,9 +42,12 @@
   .step-desc{font-size:.84rem;color:var(--muted);line-height:1.5;}
   .disclaimer{padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:.8rem;color:var(--muted);margin-top:44px;line-height:1.55;}
   .disclaimer strong{color:var(--text);}
-  footer{border-top:1px solid var(--border);background:var(--surface);padding:22px 5%;font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
-  footer a{color:var(--muted);text-decoration:none;}
-  footer a:hover{color:var(--text);}
+  .credits{margin-top:36px;padding:18px 22px;border:1px solid var(--border);background:var(--surface);border-radius:10px;}
+  .credits-title{margin:0 0 12px;font-size:1rem;font-weight:bold;color:var(--text);}
+  .credits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin-bottom:12px;}
+  .credit-name{display:block;font-weight:700;font-size:.87rem;margin-bottom:1px;color:var(--text);}
+  .credit-email{color:var(--muted);font-size:.8rem;}
+  .credits-note{font-size:.79rem;color:var(--muted);line-height:1.5;}
 </style>
 </head>
 <body>
@@ -137,15 +140,17 @@
   <div class="disclaimer">
     <strong>Data Access Statement</strong> &mdash; Data supporting this analysis cannot be made available due to client confidentiality and NDA restrictions. Code and methodological details are provided to enable replication with comparable data.
   </div>
-</div>
 
-<footer>
-  <span>NHA Applicant Journey &nbsp;&middot;&nbsp; University of Michigan School of Information &nbsp;&middot;&nbsp; April 2026</span>
-  <span>
-    <a href="index.html">&#8592; Home</a>
-    &nbsp;&nbsp;&middot;&nbsp;&nbsp;
-    <a href="appendix_cluster.html">Appendix B: Cluster Methodology &#8594;</a>
-  </span>
-</footer>
+  <section class="credits">
+    <h2 class="credits-title">Assignment Information</h2>
+    <div class="credits-grid">
+      <div><span class="credit-name">Christina Ng</span><span class="credit-email">cwjng@umich.edu</span></div>
+      <div><span class="credit-name">Adia Lee</span><span class="credit-email">adialee@umich.edu</span></div>
+      <div><span class="credit-name">Selina Shan</span><span class="credit-email">sselina@umich.edu</span></div>
+      <div><span class="credit-name">Shirley Ai</span><span class="credit-email">shirleyi@umich.edu</span></div>
+    </div>
+    <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
+  </section>
+</div>
 </body>
 </html>
