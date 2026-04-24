@@ -109,10 +109,6 @@
   .cluster-guide{padding:11px 48px 10px;background:#fffdf8;border-bottom:1px solid #d8d2c6;font-family:Georgia,serif;}
   .cluster-guide-text{font-size:.83rem;color:#4b5b68;line-height:1.5;max-width:900px;}
   .cluster-guide-text strong{color:#1f2933;}
-  .footer-credits{display:flex;gap:28px;flex-wrap:wrap;}
-  .credit-item .name{font-size:.83rem;font-weight:bold;display:block;color:#1f2933;}
-  .credit-item .email{font-size:.77rem;color:#4b5b68;display:block;}
-  .credit-note{font-size:.77rem;color:#4b5b68;text-align:right;line-height:1.5;max-width:380px;}
 </style>
 </head>
 <body>
@@ -122,7 +118,7 @@
     <a href="index.html">Home</a>
     <a href="flow.html">Flow Viz</a>
     <a href="cluster_index.html" class="active">Cluster Viz</a>
-    <a href="appendix_cluster.html">Methodology</a>
+    <a href="appendix_cluster.html">Appendix</a>
   </div>
 </nav>
 
@@ -407,15 +403,17 @@ init();
 <div id="cluster-appendix-bar" style="padding:16px 48px;background:var(--surface);border-top:1px solid var(--border);font-family:Georgia,serif;">
   <a href="appendix_cluster.html" style="font-size:.8rem;color:#2c5f8a;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">&#128196; Methodology Appendix &nearr;</a>
 </div>
-    <section class="credits">
-    <h2 class="credits-title">Assignment Information</h2>
-    <div class="credits-grid">
-      <div><span class="credit-name">Christina Ng</span><a class="credit-email" href="mailto:cwjng@umich.edu">cwjng@umich.edu</a></div>
-      <div><span class="credit-name">Adia Lee</span><a class="credit-email" href="mailto:adialee@umich.edu">adialee@umich.edu</a></div>
-      <div><span class="credit-name">Selina Shan</span><a class="credit-email" href="mailto:sselina@umich.edu">sselina@umich.edu</a></div>
-      <div><span class="credit-name">Shirley Ai</span><a class="credit-email" href="mailto:shirleyi@umich.edu">shirleyi@umich.edu</a></div>
+  <div style="padding:20px 48px 32px;background:var(--surface,#fffdf8);border-top:1px solid var(--border,#d8d2c6);">
+    <div style="max-width:900px;">
+      <div style="margin-bottom:10px;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#8a98a4;font-family:Georgia,serif;">Assignment Information</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin-bottom:10px;">
+        <div><span style="display:block;font-weight:700;font-size:.87rem;color:#1f2933;margin-bottom:1px;">Christina Ng</span><span style="color:#4b5b68;font-size:.8rem;">cwjng@umich.edu</span></div>
+        <div><span style="display:block;font-weight:700;font-size:.87rem;color:#1f2933;margin-bottom:1px;">Adia Lee</span><span style="color:#4b5b68;font-size:.8rem;">adialee@umich.edu</span></div>
+        <div><span style="display:block;font-weight:700;font-size:.87rem;color:#1f2933;margin-bottom:1px;">Selina Shan</span><span style="color:#4b5b68;font-size:.8rem;">sselina@umich.edu</span></div>
+        <div><span style="display:block;font-weight:700;font-size:.87rem;color:#1f2933;margin-bottom:1px;">Shirley Ai</span><span style="color:#4b5b68;font-size:.8rem;">shirleyi@umich.edu</span></div>
+      </div>
+      <p style="font-size:.79rem;color:#4b5b68;line-height:1.5;">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
     </div>
-    <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
-  </section>
+  </div>
 </body>
 </html>
