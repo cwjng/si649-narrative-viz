@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow Methodology — NHA</title>
+<style>
+  :root{--bg:#f7f5ef;--surface:#fffdf8;--surface2:#f0ede6;--border:#d8d2c6;--border2:#c5bfb4;--text:#1f2933;--muted:#4b5b68;--muted2:#8a98a4;--accent:#2c5f8a;--accent-light:#e8f0f7;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:Georgia,serif;font-size:15px;line-height:1.7;}
+  nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50;}
+  .nav-brand{font-size:1rem;font-weight:bold;color:var(--text);}
+  .nav-brand span{color:var(--accent);font-weight:normal;}
+  .nav-links{display:flex;gap:24px;}
+  .nav-links a{font-size:.8rem;color:var(--muted);text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;}
+  .nav-links a:hover,.nav-links a.active{color:var(--text);}
+  .page{max-width:780px;margin:0 auto;padding:52px 32px 80px;}
+  .eyebrow{font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .eyebrow::after{content:'';width:40px;height:1px;background:var(--accent);opacity:.4;}
+  h1{font-size:2.1rem;font-weight:normal;margin-bottom:10px;line-height:1.15;}
+  .page-sub{font-size:.97rem;color:var(--muted);margin-bottom:44px;line-height:1.6;}
+  section{margin-bottom:48px;}
+  .sec-label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px;}
+  h2{font-size:1.3rem;font-weight:normal;margin-bottom:14px;color:var(--text);padding-bottom:8px;border-bottom:1px solid var(--border);}
+  p{margin-bottom:14px;color:var(--muted);}
+  p strong{color:var(--text);}
+  ul{padding-left:0;margin-bottom:14px;list-style:none;display:flex;flex-direction:column;gap:8px;}
+  li{color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.55;font-size:.92rem;}
+  li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:8px;}
+  li strong{color:var(--text);}
+  .placeholder-box{background:var(--surface);border:2px dashed var(--border2);border-radius:10px;padding:38px 32px;text-align:center;margin:20px 0;}
+  .placeholder-icon{font-size:32px;margin-bottom:12px;opacity:.4;}
+  .placeholder-title{font-size:1rem;color:var(--muted);margin-bottom:6px;}
+  .placeholder-desc{font-size:.83rem;color:var(--muted2);line-height:1.55;}
+  .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 18px;margin:18px 0;font-size:.88rem;color:var(--muted);line-height:1.55;}
+  .callout strong{color:var(--text);display:block;margin-bottom:3px;}
+  .step-list{display:flex;flex-direction:column;gap:14px;margin:16px 0;}
+  .step{display:flex;gap:14px;align-items:flex-start;}
+  .step-num{width:26px;height:26px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:bold;flex-shrink:0;margin-top:2px;}
+  .step-body{flex:1;}
+  .step-title{font-weight:bold;color:var(--text);font-size:.9rem;margin-bottom:3px;}
+  .step-desc{font-size:.84rem;color:var(--muted);line-height:1.5;}
+  .disclaimer{padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:.8rem;color:var(--muted);margin-top:44px;line-height:1.55;}
+  .disclaimer strong{color:var(--text);}
+  footer{border-top:1px solid var(--border);background:var(--surface);padding:22px 5%;font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  footer a{color:var(--muted);text-decoration:none;}
+  footer a:hover{color:var(--text);}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">NHA &nbsp;<span>Applicant Journey</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="flow.html">Flow Viz</a>
+    <a href="cluster_index.html">Cluster Viz</a>
+    <a href="appendix_flow.html" class="active">Appendix</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="eyebrow">Appendix A &nbsp;&middot;&nbsp; Methodology</div>
+  <h1>Applicant Journey Flow Methodology</h1>
+  <p class="page-sub">Technical documentation of the data pipeline, path construction, and visualization approach used in the Applicant Journey Flow visualization.</p>
+
+  <section>
+    <div class="sec-label">Section 1</div>
+    <h2>Overview</h2>
+    <p>The Applicant Journey Flow visualization maps every distinct sequence of decisions an applicant can move through &mdash; from initial application, through lottery, acceptance, registration, and enrollment, to retention outcomes. Because applicants can reach the same outcome via different paths, this visualization treats the journey as a directed graph rather than a simple funnel.</p>
+    <div class="callout">
+      <strong>Why paths matter</strong>
+      A simple funnel collapses the heterogeneity in how applicants arrive at outcomes. Two applicants who both enrolled may have followed very different sequences. This visualization preserves that nuance by encoding full path sequences.
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Section 2</div>
+    <h2>Data Sources &amp; Scope</h2>
+    <div class="placeholder-box">
+      <div class="placeholder-icon">&#128203;</div>
+      <div class="placeholder-title">To be completed</div>
+      <div class="placeholder-desc">Details about data sources, year range (2023&ndash;2025), school coverage, and any exclusion criteria will be added here.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Section 3</div>
+    <h2>Path Construction</h2>
+    <div class="placeholder-box">
+      <div class="placeholder-icon">&#8644;</div>
+      <div class="placeholder-title">To be completed</div>
+      <div class="placeholder-desc">Documentation of how the sequence of stage flags is encoded into unique path strings, how paths are aggregated by count, and how the top-8 ranking algorithm works will be added here.</div>
+    </div>
+    <p>Each path in the visualization corresponds to a unique combination of binary stage flags representing the applicant&rsquo;s journey. The top 8 paths by applicant volume are shown for any given filter combination.</p>
+  </section>
+
+  <section>
+    <div class="sec-label">Section 4</div>
+    <h2>Visualization Design</h2>
+    <p>The visualization consists of three linked panels:</p>
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">A</div>
+        <div class="step-body">
+          <div class="step-title">Top Ranked Applicant Outcomes</div>
+          <div class="step-desc">Shows the 8 most common journey paths for the current filter. Bars are clickable to select a path and highlight it across all panels. When selected, raw count bars dim and a proportion overlay appears.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">B</div>
+        <div class="step-body">
+          <div class="step-title">Final Outcomes</div>
+          <div class="step-desc">Aggregates all applicants by their terminal outcome. When a path is selected, an overlay shows how applicants in that path distribute across outcomes, with a proportion label.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">C</div>
+        <div class="step-body">
+          <div class="step-title">Applicant Journey Flow Diagram</div>
+          <div class="step-desc">A directed node-link diagram connecting every decision stage. Edge thickness encodes the number of applicants on each transition. Selecting a path illuminates its route through the diagram.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Section 5</div>
+    <h2>Filtering</h2>
+    <p>Three independent filters update all panels simultaneously:</p>
+    <ul>
+      <li><strong>Year</strong> &mdash; filter to a specific academic year (2023, 2024, 2025) or view all years combined</li>
+      <li><strong>School</strong> &mdash; filter to any specific NHA school by name</li>
+      <li><strong>Grade</strong> &mdash; filter to a specific grade level (Pre-K through 12)</li>
+    </ul>
+  </section>
+
+  <div class="disclaimer">
+    <strong>Data Access Statement</strong> &mdash; Data supporting this analysis cannot be made available due to client confidentiality and NDA restrictions. Code and methodological details are provided to enable replication with comparable data.
+  </div>
+</div>
+
+<footer>
+  <span>NHA Applicant Journey &nbsp;&middot;&nbsp; University of Michigan School of Information &nbsp;&middot;&nbsp; April 2026</span>
+  <span>
+    <a href="index.html">&#8592; Home</a>
+    &nbsp;&nbsp;&middot;&nbsp;&nbsp;
+    <a href="appendix_cluster.html">Appendix B: Cluster Methodology &#8594;</a>
+  </span>
+</footer>
+</body>
+</html>

@@ -1,108 +1,169 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Applicant Journey Flow</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 24px;
-      font-family: Georgia, serif;
-      background: #f7f5ef;
-      color: #1f2933;
-    }
-    .page {
-      max-width: 1180px;
-      margin: 0 auto;
-    }
-    .page-header {
-      margin: 0 0 20px;
-    }
-    .page-title {
-      margin: 0 0 8px;
-      font-size: 2rem;
-      line-height: 1.1;
-    }
-    .page-subtitle {
-      margin: 0;
-      font-size: 1rem;
-      line-height: 1.5;
-      color: #4b5b68;
-    }
-    #vis {
-      margin: 0 auto;
-    }
-    #vis.vega-embed {
-      width: 100%;
-      display: flex;
-    }
-    #vis.vega-embed details,
-    #vis.vega-embed details summary {
-      position: relative;
-    }
-    .credits {
-      margin-top: 24px;
-      padding: 18px 20px;
-      border: 1px solid #d8d2c6;
-      background: #fffdf8;
-      border-radius: 10px;
-    }
-    .credits-title {
-      margin: 0 0 12px;
-      font-size: 1.05rem;
-    }
-    .credits-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px 18px;
-      margin-bottom: 14px;
-    }
-    .credit-name {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-    .credit-email {
-      color: #4b5b68;
-      text-decoration: none;
-    }
-    .credits-note {
-      margin: 0;
-      line-height: 1.5;
-      color: #4b5b68;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.1.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-embed@7"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NHA Applicant Journey</title>
+<style>
+  :root {
+    --bg:#f7f5ef;--surface:#fffdf8;--surface2:#f0ede6;
+    --border:#d8d2c6;--border2:#c5bfb4;
+    --text:#1f2933;--muted:#4b5b68;--muted2:#8a98a4;
+    --accent:#2c5f8a;--accent-light:#e8f0f7;
+    --c1:#E69F00;--c2:#0072B2;--c3:#009E73;--c4:#D55E00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;}
+  nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:56px;}
+  .nav-brand{font-size:1rem;font-weight:bold;color:var(--text);}
+  .nav-brand span{color:var(--accent);font-weight:normal;}
+  .nav-links{display:flex;gap:24px;}
+  .nav-links a{font-size:.8rem;color:var(--muted);text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;}
+  .nav-links a:hover{color:var(--text);}
+  .hero{padding:60px 5% 44px;border-bottom:1px solid var(--border);}
+  .hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+  .hero-eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  .hero-eyebrow::after{content:'';width:50px;height:1px;background:var(--accent);opacity:.4;}
+  .hero h1{font-size:2.7rem;font-weight:normal;line-height:1.1;margin-bottom:16px;}
+  .hero h1 em{font-style:normal;color:var(--accent);}
+  .hero-desc{font-size:.97rem;line-height:1.7;color:var(--muted);}
+  .hero-goals{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
+  .hero-goal{display:flex;align-items:flex-start;gap:10px;font-size:.88rem;color:var(--muted);line-height:1.5;}
+  .hero-goal::before{content:'\2022';color:var(--accent);flex-shrink:0;margin-top:2px;font-size:1.1rem;}
+  .disclaimer{margin-top:24px;padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:0 6px 6px 0;font-size:.79rem;color:var(--muted);line-height:1.55;}
+  .disclaimer strong{color:var(--text);display:block;margin-bottom:3px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;}
+  .cards-section{padding:44px 5% 36px;flex:1;}
+  .cards-inner{max-width:1100px;margin:0 auto;}
+  .section-label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+  .cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .explore-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:38px 38px 34px;cursor:pointer;transition:all .22s ease;text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;}
+  .explore-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .explore-card.flow::before{background:linear-gradient(90deg,var(--c2),var(--c3));}
+  .explore-card.cluster::before{background:linear-gradient(90deg,var(--c1),var(--c4));}
+  .explore-card:hover{border-color:var(--border2);box-shadow:0 8px 32px rgba(0,0,0,.09);transform:translateY(-3px);}
+  .card-tag{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;display:inline-block;padding:3px 10px;border-radius:20px;border:1px solid;}
+  .explore-card.flow .card-tag{color:var(--c2);border-color:rgba(0,114,178,.3);background:rgba(0,114,178,.06);}
+  .explore-card.cluster .card-tag{color:var(--c4);border-color:rgba(213,94,0,.3);background:rgba(213,94,0,.06);}
+  .card-icon{font-size:28px;margin-bottom:14px;display:block;}
+  .card-title{font-size:1.55rem;font-weight:normal;margin-bottom:10px;line-height:1.2;}
+  .card-hook{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+  .card-features{display:flex;flex-direction:column;gap:6px;margin-bottom:28px;}
+  .card-feature{font-size:.79rem;color:var(--muted);display:flex;align-items:flex-start;gap:8px;line-height:1.45;}
+  .card-feature::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+  .explore-card.flow .card-feature::before{background:var(--c2);}
+  .explore-card.cluster .card-feature::before{background:var(--c1);}
+  .card-cta{font-size:.8rem;font-weight:bold;display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;transition:gap .15s;}
+  .explore-card.flow .card-cta{color:#fff;background:var(--c2);}
+  .explore-card.cluster .card-cta{color:#fff;background:var(--c4);}
+  .explore-card:hover .card-cta{gap:12px;}
+  .appendix-section{padding:0 5% 48px;}
+  .appendix-inner{max-width:1100px;margin:0 auto;}
+  .appendix-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .appendix-link{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 22px;text-decoration:none;color:var(--text);display:flex;align-items:center;justify-content:space-between;transition:all .15s;gap:12px;}
+  .appendix-link:hover{border-color:var(--border2);box-shadow:0 2px 10px rgba(0,0,0,.06);}
+  .appendix-link-left{display:flex;align-items:center;gap:12px;}
+  .appendix-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+  .appendix-link.flow .appendix-icon{background:rgba(0,114,178,.08);}
+  .appendix-link.cluster .appendix-icon{background:rgba(230,159,0,.08);}
+  .appendix-link-title{font-size:.9rem;font-weight:bold;display:block;margin-bottom:2px;}
+  .appendix-link-sub{font-size:.77rem;color:var(--muted);}
+  .appendix-arrow{font-size:1.1rem;color:var(--muted2);flex-shrink:0;}
+  footer{padding:26px 5% 28px;border-top:1px solid var(--border);background:var(--surface);}
+  .footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .credits-grid{display:flex;gap:28px;flex-wrap:wrap;}
+  .credit-item .name{font-size:.83rem;font-weight:bold;display:block;}
+  .credit-item a{font-size:.77rem;color:var(--muted);text-decoration:none;}
+  .credit-item a:hover{color:var(--text);}
+  .credit-note{font-size:.77rem;color:var(--muted);text-align:right;line-height:1.5;max-width:380px;}
+</style>
 </head>
 <body>
-  <main class="page">
-    <header class="page-header">
-      <h1 class="page-title">Applicant Journey Flow</h1>
-      <p class="page-subtitle">National Heritage Academies application flow visualization.</p>
-    </header>
-    <div id="vis"></div>
-    <section class="credits" aria-labelledby="credits-title">
-      <h2 class="credits-title" id="credits-title">Assignment Information</h2>
-      <div class="credits-grid">
-        <div>
-          <span class="credit-name">Christina Ng</span>
-          <a class="credit-email" href="mailto:cwjng@umich.edu">cwjng@umich.edu</a>
+
+<nav>
+  <div class="nav-brand">NHA &nbsp;<span>Applicant Journey</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="flow.html">Flow Viz</a>
+    <a href="cluster_index.html">Cluster Viz</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Exploratory Narrative Visualization &nbsp;&middot;&nbsp; NHA</div>
+      <h1>Understanding the<br><em>Applicant Journey</em><br>at NHA</h1>
+      <p class="hero-desc">This project narrates how prospective students move through National Heritage Academies' enrollment process &mdash; from initial application through first days in the classroom. Rather than just telling, these visualizations <em>show</em> the full complexity of applicant paths.</p>
+    </div>
+    <div>
+      <div class="hero-goals">
+        <div class="hero-goal">Visualize the many possible paths an applicant can take through NHA&rsquo;s enrollment process &mdash; because the complexity is better shown than described.</div>
+        <div class="hero-goal">Explore and characterize the types of applicants appearing in NHA&rsquo;s data from the 2023&ndash;2025 academic years to surface patterns and archetypes.</div>
+        <div class="hero-goal">Support NHA&rsquo;s understanding of where applicants are lost, committed, or redirected throughout the enrollment funnel.</div>
+      </div>
+      <div class="disclaimer">
+        <strong>Data Access Statement</strong>
+        Data supporting this analysis cannot be made available due to client confidentiality and NDA restrictions. Code and methodological details are provided to enable replication with comparable data.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cards-section">
+  <div class="cards-inner">
+    <div class="section-label">Choose an exploration route</div>
+    <div class="cards-grid">
+      <a href="flow.html" class="explore-card flow">
+        <div class="card-tag">Flow Analysis</div>
+        <div class="card-icon">&#8674;</div>
+        <div class="card-title">Applicant Journey Flow</div>
+        <div class="card-hook">Trace every possible route an applicant takes &mdash; from application through enrollment. See which paths are most common and where applicants exit the funnel.</div>
+        <div class="card-features">
+          <div class="card-feature">Filter by year, school, and grade to explore subsets</div>
+          <div class="card-feature">Click any journey path to highlight it across all charts</div>
+          <div class="card-feature">Interactive flow diagram with transition-level counts</div>
         </div>
-        <div>
-          <span class="credit-name">Adia Lee</span>
-          <a class="credit-email" href="mailto:adialee@umich.edu">adialee@umich.edu</a>
+        <div class="card-cta">Explore the flow &#8594;</div>
+      </a>
+      <a href="cluster_index.html" class="explore-card cluster">
+        <div class="card-tag">Cluster Analysis</div>
+        <div class="card-icon">&#9678;</div>
+        <div class="card-title">Applicant Archetypes</div>
+        <div class="card-hook">Discover the four types of applicants in NHA&rsquo;s data. Each archetype tells a different story &mdash; from fully committed families to applicants who never received an offer.</div>
+        <div class="card-features">
+          <div class="card-feature">4 data-driven archetypes across 227,641 applicant records</div>
+          <div class="card-feature">Journey funnel, application timing, and sibling enrollment charts</div>
+          <div class="card-feature">PCA scatterplot showing cluster separation in feature space</div>
         </div>
-        <div>
-          <span class="credit-name">Selina Shan</span>
-          <a class="credit-email" href="mailto:sselina@umich.edu">sselina@umich.edu</a>
+        <div class="card-cta">Explore the archetypes &#8594;</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="appendix-section">
+  <div class="appendix-inner">
+    <div class="section-label" style="margin-bottom:14px;">Methodology appendices</div>
+    <div class="appendix-grid">
+      <a href="appendix_flow.html" class="appendix-link flow">
+        <div class="appendix-link-left">
+          <div class="appendix-icon">&#128196;</div>
+          <div>
+            <span class="appendix-link-title">Appendix A &mdash; Flow Methodology</span>
+            <span class="appendix-link-sub">Data sources, path construction, and visualization design</span>
+          </div>
         </div>
-        <div>
-          <span class="credit-name">Shirley Ai</span>
-          <a class="credit-email" href="mailto:shirleyi@umich.edu">shirleyi@umich.edu</a>
+        <div class="appendix-arrow">&#8599;</div>
+      </a>
+      <a href="appendix_cluster.html" class="appendix-link cluster">
+        <div class="appendix-link-left">
+          <div class="appendix-icon">&#128196;</div>
+          <div>
+            <span class="appendix-link-title">Appendix B &mdash; Clustering Methodology</span>
+            <span class="appendix-link-sub">Feature selection, preprocessing, PCA, and K-Means</span>
+          </div>
         </div>
+<<<<<<< new_viz
       </div>
       <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA), University of Michigan School of Information, April 2026.</p>
     </section>
@@ -111,27 +172,24 @@
     const spec = {"config":{"view":{"continuousWidth":300,"continuousHeight":300,"stroke":null},"axis":{"labelFontSize":13,"titleFontSize":14},"title":{"anchor":"start","fontSize":22}},"vconcat":[{"hconcat":[{"layer":[{"mark":{"type":"bar","color":"white","opacity":0.97},"encoding":{"opacity":{"condition":{"param":"path_select","value":0.99,"empty":true},"value":0.86},"stroke":{"condition":{"param":"path_select","value":"#111827"},"value":"#d7dde4"},"strokeWidth":{"condition":{"param":"path_select","value":2.4},"value":0.8},"x":{"axis":{"title":"Applicants"},"field":"label_start","scale":{"domain":[-126985,91757]},"type":"quantitative"},"x2":{"field":"label_end"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"bar","cornerRadiusEnd":4,"fillOpacity":0.84},"encoding":{"color":{"field":"outcome_fill","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.24},"stroke":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"outcome_dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"strokeWidth":{"condition":{"param":"path_select","value":4},"value":2.2},"tooltip":[{"field":"path","title":"Path","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"},{"field":"final_outcome","title":"Outcome","type":"nominal"}],"x":{"axis":{"title":"Applicants"},"field":"count","scale":{"domain":[-126985,91757]},"type":"quantitative"},"x2":{"datum":0},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"text","align":"left","baseline":"middle","fontSize":14,"fontWeight":"bold"},"encoding":{"color":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.38},"text":{"field":"path_id","type":"nominal"},"tooltip":[{"field":"path","title":"Path","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"},{"field":"final_outcome","title":"Outcome","type":"nominal"}],"x":{"axis":null,"field":"label_anchor","scale":{"domain":[-126985,91757]},"type":"quantitative"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"text","align":"left","baseline":"middle","color":"#263238","dx":44,"fontSize":14},"encoding":{"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.38},"text":{"field":"path_label","type":"nominal"},"tooltip":[{"field":"path","title":"Path","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"},{"field":"final_outcome","title":"Outcome","type":"nominal"}],"x":{"axis":null,"field":"label_anchor","scale":{"domain":[-126985,91757]},"type":"quantitative"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"text","align":"left","baseline":"bottom","color":"#263238","dx":6,"dy":-2,"fontSize":13,"fontWeight":"bold"},"encoding":{"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.38},"text":{"field":"count_text","type":"nominal"},"x":{"axis":null,"field":"count","scale":{"domain":[-126985,91757]},"type":"quantitative"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"bar","cursor":"pointer","opacity":0.001},"encoding":{"x":{"axis":{"title":"Applicants"},"field":"label_start","scale":{"domain":[-126985,91757]},"type":"quantitative"},"x2":{"datum":91757},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"name":"view_55a77736f841803b_5","transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]}],"data":{"name":"data-c94b8840898a1e0b627d7187c1a998db"},"height":300,"title":"Top Ranked Applicant Outcomes","width":760},{"layer":[{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"mark":{"type":"bar","cornerRadiusTopLeft":6,"cornerRadiusTopRight":6,"fillOpacity":0.84,"strokeWidth":2.2,"width":96},"encoding":{"color":{"field":"outcome_fill","legend":null,"scale":null,"type":"nominal"},"stroke":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"outcome_dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"outcome","title":"Outcome","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"title":"Final Outcomes","transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"}]},{"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"mark":{"type":"bar","fillOpacity":0.45,"strokeWidth":2.6,"width":42},"encoding":{"color":{"field":"outcome_fill","legend":null,"scale":null,"type":"nominal"},"stroke":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"outcome_dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"path","title":"Selected path","type":"nominal"},{"field":"outcome","title":"Outcome","type":"nominal"},{"field":"count","format":",","title":"Applicants in path","type":"quantitative"},{"field":"share","format":".1%","title":"Share of outcome","type":"quantitative"}],"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}},{"joinaggregate":[{"op":"distinct","field":"path","as":"selected_path_count"}]},{"filter":"datum.selected_path_count == 1"}]},{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"mark":{"type":"text","color":"#263238","dy":-8,"fontSize":14,"fontWeight":"bold"},"encoding":{"text":{"field":"count_text","type":"nominal"},"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"}]},{"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"mark":{"type":"text","color":"#111827","dy":-8,"fontSize":13,"fontWeight":"bold"},"encoding":{"text":{"field":"share_label","type":"nominal"},"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}},{"joinaggregate":[{"op":"distinct","field":"path","as":"selected_path_count"}]},{"filter":"datum.selected_path_count == 1"}]}],"height":300,"width":300}],"spacing":22},{"hconcat":[{"data":{"name":"data-d285a7403ed98ae579761d64a864032b"},"mark":{"type":"point","opacity":0},"encoding":{"x":{"axis":null,"field":"x","type":"quantitative"}},"height":500,"width":191},{"layer":[{"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"mark":{"type":"rule","strokeCap":"round"},"encoding":{"color":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"opacity":{"field":"edge_opacity","legend":null,"type":"quantitative"},"size":{"field":"line_weight","legend":null,"scale":{"range":[1.5,10]},"type":"quantitative"},"strokeDash":{"field":"line_style","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"label","title":"Transition","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x2"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y2"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.14 : 0.04) : (datum.count > 0 ? 0.45 : 0.14)","as":"edge_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.3 : 0.12) : (datum.count > 0 ? 1 : 0.45)","as":"edge_label_opacity"}]},{"data":{"name":"data-2da615531b26e383fca9f70fd55dd42b"},"mark":{"type":"rule","strokeCap":"round"},"encoding":{"color":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"size":{"field":"line_weight","legend":null,"scale":{"range":[6,17]},"type":"quantitative"},"strokeDash":{"field":"line_style","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"path","title":"Selected path","type":"nominal"},{"field":"label","title":"Transition","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x2"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y2"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]},{"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"mark":{"type":"text","align":"center","baseline":"middle","fontSize":15,"fontWeight":"bold"},"encoding":{"color":{"field":"label_color","legend":null,"scale":null,"type":"nominal"},"opacity":{"field":"edge_label_opacity","legend":null,"type":"quantitative"},"text":{"field":"label","type":"nominal"},"x":{"axis":null,"field":"label_x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"label_y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.14 : 0.04) : (datum.count > 0 ? 0.45 : 0.14)","as":"edge_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.3 : 0.12) : (datum.count > 0 ? 1 : 0.45)","as":"edge_label_opacity"}]},{"data":{"name":"data-2da615531b26e383fca9f70fd55dd42b"},"mark":{"type":"text","align":"center","baseline":"middle","fontSize":15,"fontWeight":"bold"},"encoding":{"color":{"field":"label_color","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"text":{"field":"label","type":"nominal"},"x":{"axis":null,"field":"label_x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"label_y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]},{"data":{"name":"data-7eee8b534bba1831069c790277a6628c"},"mark":{"type":"rect","cornerRadius":18,"strokeWidth":1.9},"encoding":{"color":{"field":"fill","legend":null,"scale":null,"type":"nominal"},"opacity":{"field":"node_box_opacity","legend":null,"type":"quantitative"},"stroke":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"title","title":"Node","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x0","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x1"},"y":{"axis":null,"field":"y0","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y1"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.18 : 0.06) : (datum.count > 0 ? 0.58 : 0.22)","as":"node_box_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.35 : 0.12) : (datum.count > 0 ? 1 : 0.6)","as":"node_title_opacity"}]},{"data":{"name":"data-de30ca1fae70b3cc2dcebbf1131f2d22"},"mark":{"type":"rect","cornerRadius":18,"strokeWidth":4.2},"encoding":{"color":{"value":"#FFF9E8"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"stroke":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"path","title":"Selected path","type":"nominal"},{"field":"title","title":"Node","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x0","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x1"},"y":{"axis":null,"field":"y0","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y1"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]},{"data":{"name":"data-7eee8b534bba1831069c790277a6628c"},"mark":{"type":"text","align":"center","baseline":"middle","color":"#273043","fontSize":16,"fontWeight":"bold"},"encoding":{"opacity":{"field":"node_title_opacity","legend":null,"type":"quantitative"},"text":{"field":"title","type":"nominal"},"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.18 : 0.06) : (datum.count > 0 ? 0.58 : 0.22)","as":"node_box_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.35 : 0.12) : (datum.count > 0 ? 1 : 0.6)","as":"node_title_opacity"}]},{"data":{"name":"data-de30ca1fae70b3cc2dcebbf1131f2d22"},"mark":{"type":"text","align":"center","baseline":"middle","color":"#111827","fontSize":16,"fontWeight":"bold"},"encoding":{"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"text":{"field":"title","type":"nominal"},"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]}],"height":500,"title":"Applicant Journey Flow","width":700},{"data":{"name":"data-d285a7403ed98ae579761d64a864032b"},"mark":{"type":"point","opacity":0},"encoding":{"x":{"axis":null,"field":"x","type":"quantitative"}},"height":500,"width":191}],"spacing":0}],"params":[{"name":"path_select","select":{"type":"point","clear":"dblclick","fields":["path"],"on":"click"},"views":["view_55a77736f841803b_5"]},{"name":"year_pick","bind":{"input":"select","options":["All","2023","2024","2025"],"name":"Year: "},"value":"All"},{"name":"school_pick","bind":{"input":"select","options":["All","Achieve","Advantage","Alliance","Andrew J. Brown","Apex","Arbor Prep","Aspire","Atlanta Heights","Bennett Venture","Brooklyn Dreams","Brooklyn Excelsior","Brooklyn Scholars","Buffalo United","Burton Glen","Canton","Canton Prep","Capstone","Center Line","Chandler Woods","Cross Creek","Detroit Enterprise","Detroit Merit","Detroit Premier","Eagle Crest","East Arbor","Emerson","Endeavor","Excel","Flagship","Forsyth","Fortis","Foundations","Four Points","Gate City","Grand River","Grand River Prep","Great Oaks","Greensboro","Hamtramck","Holly Park","Inspire","Johnston","Keystone","Knapp","Landmark","Laurus","Legacy","Linden","Matthews","Metro","Mill Creek","Milwaukee Scholars","Mountain View","North Dayton","North Oak","North Saginaw","Oakside Prep","Orion","Paragon","Paramount","Pathway","Peak","Pembroke","Phoenix","Pinnacle","Plymouth","PreEminent","PrepNet Virtual","Prevail","Queen's Grant","Quest","Reach","Regent Park","Research Triangle","Ridge Park","River City","Riverton Street","Rolesville","Sky Ranch","South Arbor","South Canton","South Pointe","Southside","Stambaugh","Summerfield","Summit Creek","Taylor","Taylor Prep","Timberland","Triumph","Vanderbilt","Vanguard","Vista","Wake Forest","Walker","Walton","Warrendale","Wellspring Prep","Westfield","Westfield Prep","Willow","Windemere Park","Winterfield Venture","Winterville"],"name":"School: "},"value":"All"},{"name":"grade_pick","bind":{"input":"select","options":["All","Pre-K","K","1","2","3","4","5","6","7","8","9","10","11","12"],"name":"Grade: "},"value":"All"}],"spacing":24,"$schema":"https://vega.github.io/schema/vega-lite/v6.1.0.json"};
     const datasetUrls = {"data-c94b8840898a1e0b627d7187c1a998db":"interactive_viz_data/data-c94b8840898a1e0b627d7187c1a998db.json","data-dda4bfef52018bd40ca29976dcbd3eab":"interactive_viz_data/data-dda4bfef52018bd40ca29976dcbd3eab.json","data-e063c824dcd93a651c35a1e853d1a9a2":"interactive_viz_data/data-e063c824dcd93a651c35a1e853d1a9a2.json","data-d285a7403ed98ae579761d64a864032b":"interactive_viz_data/data-d285a7403ed98ae579761d64a864032b.json","data-86a1e9421f0314b075694370406257ab":"interactive_viz_data/data-86a1e9421f0314b075694370406257ab.json","data-2da615531b26e383fca9f70fd55dd42b":"interactive_viz_data/data-2da615531b26e383fca9f70fd55dd42b.json","data-7eee8b534bba1831069c790277a6628c":"interactive_viz_data/data-7eee8b534bba1831069c790277a6628c.json","data-de30ca1fae70b3cc2dcebbf1131f2d22":"interactive_viz_data/data-de30ca1fae70b3cc2dcebbf1131f2d22.json"};
     const cacheBust = "1776970204";
+=======
+        <div class="appendix-arrow">&#8599;</div>
+      </a>
+    </div>
+  </div>
+</div>
+>>>>>>> main
 
-    Promise.all(
-      Object.entries(datasetUrls).map(([name, url]) =>
-        fetch(`${url}?v=${cacheBust}`, { cache: "no-store" })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`Failed to load ${url}: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then((data) => [name, data])
-      )
-    )
-      .then((entries) => {
-        spec.datasets = Object.fromEntries(entries);
-        return vegaEmbed("#vis", spec, { mode: "vega-lite", actions: false });
-      })
-      .catch((error) => {
-        document.getElementById("vis").innerHTML = `<pre>${error.message}</pre>`;
-        throw error;
-      });
-  </script>
+<footer>
+  <div class="footer-inner">
+    <div class="credits-grid">
+      <div class="credit-item"><span class="name">Christina Ng</span><a href="mailto:cwjng@umich.edu">cwjng@umich.edu</a></div>
+      <div class="credit-item"><span class="name">Adia Lee</span><a href="mailto:adialee@umich.edu">adialee@umich.edu</a></div>
+      <div class="credit-item"><span class="name">Selina Shan</span><a href="mailto:sselina@umich.edu">sselina@umich.edu</a></div>
+      <div class="credit-item"><span class="name">Shirley Ai</span><a href="mailto:shirleyi@umich.edu">shirleyi@umich.edu</a></div>
+    </div>
+    <div class="credit-note">Developed in partnership with National Heritage Academies, Inc. (NHA)<br>University of Michigan School of Information &middot; April 2026</div>
+  </div>
+</footer>
 </body>
 </html>
