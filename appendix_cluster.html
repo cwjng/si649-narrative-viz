@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clustering Methodology — NHA</title>
+<title>Cluster Methodology — NHA</title>
 <style>
-  :root{--bg:#f7f5ef;--surface:#fffdf8;--surface2:#f0ede6;--border:#d8d2c6;--border2:#c5bfb4;--text:#1f2933;--muted:#4b5b68;--muted2:#8a98a4;--accent:#2c5f8a;--accent-light:#e8f0f7;--c1:#E69F00;--c1k:#8a5800;--c2:#0072B2;--c2k:#00497a;--c3:#009E73;--c3k:#006b4e;--c4:#D55E00;--c4k:#8a3b00;}
+  :root{--bg:#f7f5ef;--surface:#fffdf8;--surface2:#f0ede6;--border:#d8d2c6;--border2:#c5bfb4;--text:#1f2933;--muted:#4b5b68;--muted2:#8a98a4;--accent:#2c5f8a;--accent-light:#e8f0f7;
+    --c1k:#8a5800;--c2k:#00497a;--c3k:#006b4e;--c4k:#8a3b00;}
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:Georgia,serif;font-size:15px;line-height:1.7;}
   nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50;}
@@ -24,24 +25,27 @@
   h2{font-size:1.3rem;font-weight:normal;margin-bottom:14px;color:var(--text);padding-bottom:8px;border-bottom:1px solid var(--border);}
   p{margin-bottom:14px;color:var(--muted);}
   p strong{color:var(--text);}
-  ul{padding-left:0;margin-bottom:14px;list-style:none;display:flex;flex-direction:column;gap:12px;}
-  li{color:var(--muted);padding-left:16px;position:relative;line-height:1.55;font-size:.92rem;}
-  li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.5;position:absolute;left:0;top:9px;}
-  li strong{color:var(--text);display:block;margin-bottom:1px;}
+  ul{padding-left:0;margin-bottom:14px;list-style:none;display:flex;flex-direction:column;gap:8px;}
+  li{color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.55;font-size:.92rem;}
+  li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:8px;}
+  li strong{color:var(--text);}
   .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 18px;margin:18px 0;font-size:.88rem;color:var(--muted);line-height:1.55;}
   .callout strong{color:var(--text);display:block;margin-bottom:3px;}
   .cluster-strip{display:flex;flex-direction:column;gap:8px;margin:18px 0;}
-  .cluster-chip{padding:8px 16px;border-radius:8px;font-size:.84rem;border:1px solid;display:flex;align-items:center;gap:10px;}
-  .cluster-chip .chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .cluster-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:7px;border:1px solid;font-size:.84rem;}
+  .chip-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
   .cluster-chip.c1{color:var(--c1k);background:rgba(230,159,0,.07);border-color:rgba(230,159,0,.25);}
   .cluster-chip.c2{color:var(--c2k);background:rgba(0,114,178,.07);border-color:rgba(0,114,178,.25);}
   .cluster-chip.c3{color:var(--c3k);background:rgba(0,158,115,.07);border-color:rgba(0,158,115,.25);}
   .cluster-chip.c4{color:var(--c4k);background:rgba(213,94,0,.07);border-color:rgba(213,94,0,.25);}
   .disclaimer{padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:.8rem;color:var(--muted);margin-top:44px;line-height:1.55;}
   .disclaimer strong{color:var(--text);}
-  footer{border-top:1px solid var(--border);background:var(--surface);padding:22px 5%;font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
-  footer a{color:var(--muted);text-decoration:none;}
-  footer a:hover{color:var(--text);}
+  .credits{margin-top:36px;padding:18px 22px;border:1px solid var(--border);background:var(--surface);border-radius:10px;}
+  .credits-title{margin:0 0 12px;font-size:1rem;font-weight:bold;color:var(--text);}
+  .credits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin-bottom:12px;}
+  .credit-name{display:block;font-weight:700;font-size:.87rem;margin-bottom:1px;color:var(--text);}
+  .credit-email{color:var(--muted);font-size:.8rem;}
+  .credits-note{font-size:.79rem;color:var(--muted);line-height:1.5;}
 </style>
 </head>
 <body>
@@ -74,27 +78,15 @@
   <section>
     <div class="sec-label">Section 2</div>
     <h2>Dataset</h2>
-    <p>The dataset contains <strong>227,641 applicant records</strong> spanning the 2023&ndash;2025 academic years. Features fall into three broad categories:</p>
-    <ul>
-      <li><strong>Applicant demographics</strong> Household composition, sibling enrollment status, distance from school, and homelessness indicator</li>
-      <li><strong>School-level information</strong> School type and urban-centric locale designation</li>
-      <li><strong>Application metadata</strong> Application timing relative to school start, acceptance and registration timing, grade applied for, lottery outcomes, and enrollment funnel stage flags (applied, accepted, registered, enrolled, attending in first week, still enrolled at day 7)</li>
-    </ul>
-    <p>Together these features describe both <em>who</em> the applicant is and <em>how</em> they moved through (or exited) the enrollment process.</p>
+    <p>The dataset contains <strong>227,641 applicant records</strong> spanning the 2023&ndash;2025 academic years. Each record represents a single application instance and includes fields for school, grade level, academic year, lottery outcome, registration, enrollment, and early attendance indicators.</p>
+    <p>Records were filtered to exclude entries missing a valid applicant identifier or school assignment. Grade-level labels were normalized to a canonical ordering (Pre-K, K, 1&ndash;12, Unknown) for consistent filtering behavior across visualizations.</p>
   </section>
 
   <section>
     <div class="sec-label">Section 3</div>
-    <h2>Preprocessing</h2>
-    <p>Before clustering, the data was prepared through the following steps:</p>
-    <ul>
-      <li><strong>Missing value imputation for binary flags</strong> Missing values in funnel stage indicators (e.g., accepted, registered, enrolled) were filled with 0, since absence of a record means the stage was not reached.</li>
-      <li><strong>Sentinel imputation for timing variables</strong> Acceptance and registration timing variables (days before school start) were imputed with a sentinel value of 999 rather than 0. This is because negative values are meaningful in context — they indicate an applicant accepted or registered <em>after</em> school started. Missingness indicator flags were also created to preserve the signal that a timing record is absent entirely.</li>
-      <li><strong>One-hot encoding for categorical variables</strong> Nominal categorical variables (grade level, school type, locale designation) were one-hot encoded to convert them to numeric form without imposing an artificial ordering.</li>
-      <li><strong>Standard scaling for numeric variables</strong> All numeric features were standardized to zero mean and unit variance, preventing high-range continuous variables (e.g., days before school start) from dominating the clustering over binary indicators.</li>
-    </ul>
-
-    <p>After preprocessing, PCA reduced the feature space to 2 components for clustering and visualization. K-Means was then applied with k&nbsp;=&nbsp;4, using 10 independent initializations to reduce sensitivity to starting conditions.</p>
+    <h2>Preprocessing &amp; Model</h2>
+    <p>The following binary features were used as clustering inputs: accepted at lottery, accepted (any path), waitlisted, registered, enrolled, and attending. Continuous features (e.g., application timing in days before school start) were also included after standard scaling.</p>
+    <p>One-hot encoding was applied to categorical features. Principal Component Analysis (PCA) was then applied to reduce the feature space to 2 components for visualization purposes while preserving the majority of variance. K-Means was then applied with k&nbsp;=&nbsp;4, using 10 independent initializations to reduce sensitivity to starting conditions.</p>
   </section>
 
   <section>
@@ -113,15 +105,17 @@
   <div class="disclaimer">
     <strong>Data Access Statement</strong> &mdash; Data supporting this analysis cannot be made available due to client confidentiality and NDA restrictions. Code and methodological details are provided to enable replication with comparable data.
   </div>
-</div>
 
-<footer>
-  <span>NHA Applicant Journey &nbsp;&middot;&nbsp; University of Michigan School of Information &nbsp;&middot;&nbsp; April 2026</span>
-  <span>
-    <a href="index.html">&#8592; Home</a>
-    &nbsp;&nbsp;&middot;&nbsp;&nbsp;
-    <a href="appendix_flow.html">Appendix A: Flow Methodology &#8594;</a>
-  </span>
-</footer>
+  <section class="credits">
+    <h2 class="credits-title">Assignment Information</h2>
+    <div class="credits-grid">
+      <div><span class="credit-name">Christina Ng</span><span class="credit-email">cwjng@umich.edu</span></div>
+      <div><span class="credit-name">Adia Lee</span><span class="credit-email">adialee@umich.edu</span></div>
+      <div><span class="credit-name">Selina Shan</span><span class="credit-email">sselina@umich.edu</span></div>
+      <div><span class="credit-name">Shirley Ai</span><span class="credit-email">shirleyi@umich.edu</span></div>
+    </div>
+    <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
+  </section>
+</div>
 </body>
 </html>
