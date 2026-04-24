@@ -21,7 +21,7 @@
     .appendix-link{font-size:.78rem;color:var(--accent);text-decoration:none;white-space:nowrap;}
     .appendix-link:hover{text-decoration:underline;}
 
-    /* GUIDE — single compact bar */
+    /* GUIDE */
     .guide{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 18px;margin-bottom:22px;font-size:.85rem;color:var(--muted);line-height:1.55;}
     .guide strong{color:var(--text);}
 
@@ -33,15 +33,47 @@
     #vis-error{display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 36px;margin:20px 0;}
     #vis-error h3{font-size:1.1rem;font-weight:normal;margin-bottom:10px;color:var(--text);}
     #vis-error p{font-size:.87rem;color:var(--muted);line-height:1.55;margin-bottom:10px;}
-    #vis-error code{font-family:'Courier New',monospace;font-size:.82rem;background:var(--surface2);padding:2px 6px;border-radius:3px;color:var(--text);}
+    #vis-error code{font-family:'Courier New',monospace;font-size:.82rem;background:#f0ede6;padding:2px 6px;border-radius:3px;color:var(--text);}
     #vis-error ul{padding-left:18px;margin:8px 0;}
     #vis-error li{font-size:.84rem;color:var(--muted);margin-bottom:4px;}
 
-    .credits{margin-top:28px;padding:18px 22px;border:1px solid var(--border);background:var(--surface);border-radius:10px;}
-    .credits-title{margin:0 0 12px;font-size:1rem;}
+    /* INTERACTIVE FLOWCHART */
+    .flow-section{margin-bottom:32px;}
+    .flow-section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;}
+    .flow-section-title{font-size:1.25rem;font-weight:normal;color:var(--text);}
+    .flow-section-sub{font-size:.83rem;color:var(--muted);}
+    .flow-guide{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:18px;font-size:.82rem;color:var(--muted);line-height:1.5;}
+    .flow-guide strong{color:var(--text);}
+
+    #flow-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 20px;position:relative;overflow:hidden;}
+    #flow-svg-wrap{width:100%;overflow-x:auto;}
+    #flow-svg{display:block;margin:0 auto;}
+
+    /* Path highlight legend */
+    .flow-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted);}
+    .flow-legend-item{display:flex;align-items:center;gap:6px;}
+    .flow-legend-line{width:28px;height:3px;border-radius:2px;}
+    .flow-legend-line.success{background:#0072B2;}
+    .flow-legend-line.exit{background:#A94A00;border-top:2px dashed #A94A00;height:0;}
+    .flow-legend-line.waitlist{background:#666;}
+
+    /* Path selector */
+    .path-selector{margin-bottom:18px;}
+    .path-selector-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:8px;}
+    .path-pills{display:flex;flex-wrap:wrap;gap:7px;}
+    .path-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .18s;font-family:Georgia,serif;}
+    .path-pill:hover{border-color:var(--accent);color:var(--accent);}
+    .path-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+    /* Tooltip */
+    #flow-tooltip{position:fixed;background:var(--text);color:#fff;font-size:.78rem;padding:8px 12px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;max-width:220px;line-height:1.45;font-family:Georgia,serif;}
+
+    /* CREDITS */
+    .credits{margin-top:36px;padding:18px 22px;border:1px solid var(--border);background:var(--surface);border-radius:10px;}
+    .credits-title{margin:0 0 12px;font-size:1rem;font-weight:bold;color:var(--text);}
     .credits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin-bottom:12px;}
-    .credit-name{display:block;font-weight:700;font-size:.87rem;margin-bottom:1px;}
-    .credit-email{color:var(--muted);text-decoration:none;font-size:.8rem;}
+    .credit-name{display:block;font-weight:700;font-size:.87rem;margin-bottom:1px;color:var(--text);}
+    .credit-email{color:var(--muted);font-size:.8rem;}
     .credits-note{font-size:.79rem;color:var(--muted);line-height:1.5;}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
@@ -56,7 +88,7 @@
     <a href="index.html">Home</a>
     <a href="flow.html" class="active">Flow Viz</a>
     <a href="cluster_index.html">Cluster Viz</a>
-    <a href="appendix_flow.html">Methodology</a>
+    <a href="appendix_flow.html">Appendix</a>
   </div>
 </nav>
 
@@ -66,12 +98,46 @@
       <h1>Applicant Journey Flow</h1>
       <p>NHA application flow &mdash; 2023 to 2025. Use the <strong>Year</strong>, <strong>School</strong>, and <strong>Grade</strong> dropdowns to filter.</p>
     </div>
-
   </div>
 
   <div class="guide">
     <strong>How to use:</strong> Select a journey bar to highlight it across all panels &mdash; the flow diagram and outcome bars will update. Hover any element for counts. Double-click to deselect. Use the <strong>Year</strong>, <strong>School</strong>, and <strong>Grade</strong> dropdowns to filter.
   </div>
+
+  <!-- ── INTERACTIVE FLOWCHART ─────────────────────────────────── -->
+  <div class="flow-section">
+    <div class="flow-section-header">
+      <div class="flow-section-title">Applicant Journey — Path Overview</div>
+      <div class="flow-section-sub">All possible routes from application to final outcome</div>
+    </div>
+    <div class="flow-guide">
+      <strong>How to explore:</strong> Hover any node or edge for details. Click a <strong>journey path pill</strong> below to highlight that route through the diagram. Click again to clear.
+    </div>
+
+    <div class="path-selector">
+      <div class="path-selector-label">Highlight a journey path</div>
+      <div class="path-pills">
+        <div class="path-pill" data-path="enrolled" onclick="selectPath(this,'enrolled')">Enrolled (Direct)</div>
+        <div class="path-pill" data-path="enrolled_waitlist" onclick="selectPath(this,'enrolled_waitlist')">Enrolled (via Waitlist)</div>
+        <div class="path-pill" data-path="withdrew_after_acceptance" onclick="selectPath(this,'withdrew_after_acceptance')">Withdrew after Acceptance</div>
+        <div class="path-pill" data-path="withdrew_after_registration" onclick="selectPath(this,'withdrew_after_registration')">Withdrew after Registration</div>
+        <div class="path-pill" data-path="no_show" onclick="selectPath(this,'no_show')">No Show</div>
+        <div class="path-pill" data-path="stayed_waitlisted" onclick="selectPath(this,'stayed_waitlisted')">Remained Waitlisted</div>
+      </div>
+    </div>
+
+    <div id="flow-container">
+      <div id="flow-svg-wrap">
+        <svg id="flow-svg" viewBox="0 0 820 480" xmlns="http://www.w3.org/2000/svg" style="min-width:600px;max-width:820px;width:100%;height:auto;font-family:Georgia,serif;"></svg>
+      </div>
+      <div class="flow-legend">
+        <div class="flow-legend-item"><div class="flow-legend-line" style="background:#0072B2;height:3px;"></div><span>Progression toward enrollment</span></div>
+        <div class="flow-legend-item"><div style="width:28px;border-top:2px dashed #A94A00;"></div><span>Exit / withdrawal</span></div>
+        <div class="flow-legend-item"><div class="flow-legend-line" style="background:#888;height:2px;"></div><span>Waitlist path</span></div>
+      </div>
+    </div>
+  </div>
+  <!-- ── END INTERACTIVE FLOWCHART ──────────────────────────────── -->
 
   <div id="vis-error">
     <h3>Data files not found</h3>
@@ -95,20 +161,370 @@
   <div style="margin-top:24px;margin-bottom:8px;">
     <a href="appendix_flow.html" style="font-size:.8rem;color:#2c5f8a;text-decoration:none;">&#128196; Methodology Appendix &nearr;</a>
   </div>
+
   <section class="credits">
     <h2 class="credits-title">Assignment Information</h2>
     <div class="credits-grid">
-      <div><span class="credit-name">Christina Ng</span><a class="credit-email" href="mailto:cwjng@umich.edu">cwjng@umich.edu</a></div>
-      <div><span class="credit-name">Adia Lee</span><a class="credit-email" href="mailto:adialee@umich.edu">adialee@umich.edu</a></div>
-      <div><span class="credit-name">Selina Shan</span><a class="credit-email" href="mailto:sselina@umich.edu">sselina@umich.edu</a></div>
-      <div><span class="credit-name">Shirley Ai</span><a class="credit-email" href="mailto:shirleyi@umich.edu">shirleyi@umich.edu</a></div>
+      <div><span class="credit-name">Christina Ng</span><span class="credit-email">cwjng@umich.edu</span></div>
+      <div><span class="credit-name">Adia Lee</span><span class="credit-email">adialee@umich.edu</span></div>
+      <div><span class="credit-name">Selina Shan</span><span class="credit-email">sselina@umich.edu</span></div>
+      <div><span class="credit-name">Shirley Ai</span><span class="credit-email">shirleyi@umich.edu</span></div>
     </div>
     <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
   </section>
 </div>
 
+<div id="flow-tooltip"></div>
+
 <script>
-const spec = {"config":{"view":{"continuousWidth":300,"continuousHeight":300,"stroke":null},"axis":{"labelFontSize":13,"titleFontSize":14},"title":{"anchor":"start","fontSize":22}},"vconcat":[{"hconcat":[{"layer":[{"mark":{"type":"bar","color":"white","opacity":0.97},"encoding":{"opacity":{"condition":{"param":"path_select","value":0.4,"empty":true},"value":0.97},"stroke":{"condition":{"param":"path_select","value":"#111827"},"value":"#d7dde4"},"strokeWidth":{"condition":{"param":"path_select","value":2.4},"value":0.8},"x":{"axis":{"title":"Applicants"},"field":"label_start","scale":{"domain":[-126985,91757]},"type":"quantitative"},"x2":{"field":"label_end"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"},{"field":"path","order":"ascending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"bar","cornerRadiusEnd":4,"fillOpacity":0.84},"encoding":{"color":{"field":"outcome_fill","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"param":"path_select","value":0.18,"empty":true},"value":0.84},"stroke":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"outcome_dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"strokeWidth":{"condition":{"param":"path_select","value":1},"value":2.2},"tooltip":[{"field":"path","title":"Path","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"},{"field":"final_outcome","title":"Outcome","type":"nominal"}],"x":{"axis":{"title":"Applicants"},"field":"count","scale":{"domain":[-126985,91757]},"type":"quantitative"},"x2":{"datum":0},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"},{"field":"path","order":"ascending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"text","align":"left","baseline":"middle","fontSize":14,"fontWeight":"bold"},"encoding":{"color":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"param":"path_select","value":0.25,"empty":true},"value":0.38},"text":{"field":"path_id","type":"nominal"},"x":{"axis":null,"field":"label_anchor","scale":{"domain":[-126985,91757]},"type":"quantitative"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"},{"field":"path","order":"ascending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"text","align":"left","baseline":"middle","color":"#263238","dx":44,"fontSize":14},"encoding":{"opacity":{"condition":{"param":"path_select","value":0.2,"empty":true},"value":0.38},"text":{"field":"path_label","type":"nominal"},"x":{"axis":null,"field":"label_anchor","scale":{"domain":[-126985,91757]},"type":"quantitative"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"},{"field":"path","order":"ascending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"text","align":"left","baseline":"bottom","color":"#263238","dx":6,"dy":-2,"fontSize":13,"fontWeight":"bold"},"encoding":{"opacity":{"condition":{"param":"path_select","value":0,"empty":true},"value":0.38},"text":{"field":"count_text","type":"nominal"},"x":{"axis":null,"field":"count","scale":{"domain":[-126985,91757]},"type":"quantitative"},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"},{"field":"path","order":"ascending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]},{"mark":{"type":"bar","cursor":"pointer","opacity":0.001},"encoding":{"x":{"axis":{"title":"Applicants"},"field":"label_start","scale":{"domain":[-126985,91757]},"type":"quantitative"},"x2":{"datum":91757},"y":{"axis":null,"field":"path_id","sort":{"field":"rank","order":"ascending"},"type":"nominal"}},"name":"view_55a77736f841803b_5","transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":"datum.count > 0"},{"window":[{"op":"rank","field":"count","as":"rank"}],"sort":[{"field":"count","order":"descending"},{"field":"path","order":"ascending"}]},{"filter":"datum.rank <= 8"},{"calculate":"'P' + format(datum.rank, '.0f')","as":"path_id"},{"calculate":"-126985","as":"label_start"},{"calculate":"0","as":"label_end"},{"calculate":"-124985","as":"label_anchor"},{"calculate":"format(datum.count, ',')","as":"count_text"}]}],"data":{"name":"data-c94b8840898a1e0b627d7187c1a998db"},"height":300,"title":"Top Ranked Applicant Outcomes","width":760},{"layer":[{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"mark":{"type":"bar","cornerRadiusTopLeft":6,"cornerRadiusTopRight":6,"fillOpacity":0.84,"strokeWidth":2.2,"width":96},"encoding":{"color":{"field":"outcome_fill","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"param":"path_select","value":0.22,"empty":true},"value":0.84},"stroke":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"outcome_dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"outcome","title":"Outcome","type":"nominal"},{"field":"count","format":",","title":"Total applicants","type":"quantitative"}],"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"title":"Final Outcomes","transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"}]},{"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"mark":{"type":"bar","cornerRadiusTopLeft":5,"cornerRadiusTopRight":5,"strokeWidth":2.8,"width":96},"encoding":{"color":{"field":"outcome_fill","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"stroke":{"field":"outcome_stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"outcome_dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"path","title":"Selected path","type":"nominal"},{"field":"outcome","title":"Outcome","type":"nominal"},{"field":"total_count","format":",","title":"Total in outcome","type":"quantitative"},{"field":"count","format":",","title":"In selected path","type":"quantitative"},{"field":"share","format":".1%","title":"Share of outcome","type":"quantitative"}],"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}},{"joinaggregate":[{"op":"distinct","field":"path","as":"selected_path_count"}]},{"filter":"datum.selected_path_count == 1"},{"lookup":"outcome","from":{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"key":"outcome","fields":["count"]},"as":"total_count"}]},{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"mark":{"type":"text","color":"#263238","dy":-8,"fontSize":14,"fontWeight":"bold"},"encoding":{"opacity":{"condition":{"param":"path_select","value":0,"empty":true},"value":1},"text":{"field":"count_text","type":"nominal"},"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"}]},{"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"mark":{"type":"text","color":"#111827","dy":-9,"fontSize":13,"fontWeight":"bold"},"encoding":{"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":1},"text":{"field":"share_label","type":"nominal"},"x":{"field":"outcome","title":null,"type":"nominal"},"y":{"field":"count","title":"Applicants","type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}},{"joinaggregate":[{"op":"distinct","field":"path","as":"selected_path_count"}]},{"filter":"datum.selected_path_count == 1"}]}],"height":300,"width":300}],"spacing":22},{"hconcat":[{"data":{"name":"data-d285a7403ed98ae579761d64a864032b"},"mark":{"type":"point","opacity":0},"encoding":{"x":{"axis":null,"field":"x","type":"quantitative"}},"height":500,"width":191},{"layer":[{"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"mark":{"type":"rule","strokeCap":"round"},"encoding":{"color":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"opacity":{"field":"edge_opacity","legend":null,"type":"quantitative"},"size":{"field":"line_weight","legend":null,"scale":{"range":[1.5,10]},"type":"quantitative"},"strokeDash":{"field":"line_style","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"label","title":"Transition","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x2"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y2"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.14 : 0.04) : (datum.count > 0 ? 0.45 : 0.14)","as":"edge_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.3 : 0.12) : (datum.count > 0 ? 1 : 0.45)","as":"edge_label_opacity"}]},{"data":{"name":"data-2da615531b26e383fca9f70fd55dd42b"},"mark":{"type":"rule","strokeCap":"round"},"encoding":{"color":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"size":{"field":"line_weight","legend":null,"scale":{"range":[6,17]},"type":"quantitative"},"strokeDash":{"field":"line_style","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"path","title":"Selected path","type":"nominal"},{"field":"label","title":"Transition","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x2"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y2"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]},{"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"mark":{"type":"text","align":"center","baseline":"middle","fontSize":15,"fontWeight":"bold"},"encoding":{"color":{"field":"label_color","legend":null,"scale":null,"type":"nominal"},"opacity":{"field":"edge_label_opacity","legend":null,"type":"quantitative"},"text":{"field":"label","type":"nominal"},"x":{"axis":null,"field":"label_x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"label_y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.14 : 0.04) : (datum.count > 0 ? 0.45 : 0.14)","as":"edge_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.3 : 0.12) : (datum.count > 0 ? 1 : 0.45)","as":"edge_label_opacity"}]},{"data":{"name":"data-2da615531b26e383fca9f70fd55dd42b"},"mark":{"type":"text","align":"center","baseline":"middle","fontSize":15,"fontWeight":"bold"},"encoding":{"color":{"field":"label_color","legend":null,"scale":null,"type":"nominal"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"text":{"field":"label","type":"nominal"},"x":{"axis":null,"field":"label_x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"label_y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]},{"data":{"name":"data-7eee8b534bba1831069c790277a6628c"},"mark":{"type":"rect","cornerRadius":18,"strokeWidth":1.9},"encoding":{"color":{"field":"fill","legend":null,"scale":null,"type":"nominal"},"opacity":{"field":"node_box_opacity","legend":null,"type":"quantitative"},"stroke":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"title","title":"Node","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x0","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x1"},"y":{"axis":null,"field":"y0","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y1"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.18 : 0.06) : (datum.count > 0 ? 0.58 : 0.22)","as":"node_box_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.35 : 0.12) : (datum.count > 0 ? 1 : 0.6)","as":"node_title_opacity"}]},{"data":{"name":"data-de30ca1fae70b3cc2dcebbf1131f2d22"},"mark":{"type":"rect","cornerRadius":18,"strokeWidth":4.2},"encoding":{"color":{"value":"#FFF9E8"},"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":0},"stroke":{"field":"stroke","legend":null,"scale":null,"type":"nominal"},"strokeDash":{"field":"dash","legend":null,"scale":{"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]},"type":"nominal"},"tooltip":[{"field":"path","title":"Selected path","type":"nominal"},{"field":"title","title":"Node","type":"nominal"},{"field":"count","format":",","title":"Applicants","type":"quantitative"}],"x":{"axis":null,"field":"x0","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"x2":{"field":"x1"},"y":{"axis":null,"field":"y0","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"},"y2":{"field":"y1"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]},{"data":{"name":"data-7eee8b534bba1831069c790277a6628c"},"mark":{"type":"text","align":"center","baseline":"middle","color":"#273043","fontSize":16,"fontWeight":"bold"},"encoding":{"opacity":{"field":"node_title_opacity","legend":null,"type":"quantitative"},"text":{"field":"title","type":"nominal"},"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.18 : 0.06) : (datum.count > 0 ? 0.58 : 0.22)","as":"node_box_opacity"},{"calculate":"length(data('path_select_store')) ? (datum.count > 0 ? 0.35 : 0.12) : (datum.count > 0 ? 1 : 0.6)","as":"node_title_opacity"}]},{"data":{"name":"data-de30ca1fae70b3cc2dcebbf1131f2d22"},"mark":{"type":"text","align":"center","baseline":"middle","color":"#111827","fontSize":16,"fontWeight":"bold"},"encoding":{"opacity":{"condition":{"test":"datum.count > 0","value":1},"value":1},"text":{"field":"title","type":"nominal"},"x":{"axis":null,"field":"x","scale":{"domain":[0.2,9.8]},"type":"quantitative"},"y":{"axis":null,"field":"y","scale":{"domain":[0.4,9.7],"reverse":true},"type":"quantitative"}},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}}]}],"height":500,"title":"Applicant Journey Flow","width":700},{"data":{"name":"data-d285a7403ed98ae579761d64a864032b"},"mark":{"type":"point","opacity":0},"encoding":{"x":{"axis":null,"field":"x","type":"quantitative"}},"height":500,"width":191}],"spacing":0}],"params":[{"name":"path_select","select":{"type":"point","clear":"dblclick","fields":["path"],"on":"click"},"views":["view_55a77736f841803b_5"]},{"name":"year_pick","bind":{"input":"select","options":["All","2023","2024","2025"],"name":"Year: "},"value":"All"},{"name":"school_pick","bind":{"input":"select","options":["All","Achieve","Advantage","Alliance","Andrew J. Brown","Apex","Arbor Prep","Aspire","Atlanta Heights","Bennett Venture","Brooklyn Dreams","Brooklyn Excelsior","Brooklyn Scholars","Buffalo United","Burton Glen","Canton","Canton Prep","Capstone","Center Line","Chandler Woods","Cross Creek","Detroit Enterprise","Detroit Merit","Detroit Premier","Eagle Crest","East Arbor","Emerson","Endeavor","Excel","Flagship","Forsyth","Fortis","Foundations","Four Points","Gate City","Grand River","Grand River Prep","Great Oaks","Greensboro","Hamtramck","Holly Park","Inspire","Johnston","Keystone","Knapp","Landmark","Laurus","Legacy","Linden","Matthews","Metro","Mill Creek","Milwaukee Scholars","Mountain View","North Dayton","North Oak","North Saginaw","Oakside Prep","Orion","Paragon","Paramount","Pathway","Peak","Pembroke","Phoenix","Pinnacle","Plymouth","PreEminent","PrepNet Virtual","Prevail","Queen's Grant","Quest","Reach","Regent Park","Research Triangle","Ridge Park","River City","Riverton Street","Rolesville","Sky Ranch","South Arbor","South Canton","South Pointe","Southside","Stambaugh","Summerfield","Summit Creek","Taylor","Taylor Prep","Timberland","Triumph","Vanderbilt","Vanguard","Vista","Wake Forest","Walker","Walton","Warrendale","Wellspring Prep","Westfield","Westfield Prep","Willow","Windemere Park","Winterfield Venture","Winterville"],"name":"School: "},"value":"All"},{"name":"grade_pick","bind":{"input":"select","options":["All","Pre-K","K","1","2","3","4","5","6","7","8","9","10","11","12"],"name":"Grade: "},"value":"All"}],"spacing":24,"$schema":"https://vega.github.io/schema/vega-lite/v6.1.0.json"};
+// ── INTERACTIVE FLOW CHART ──────────────────────────────────────────────────
+(function() {
+  const svg = document.getElementById('flow-svg');
+  const tt  = document.getElementById('flow-tooltip');
+  const W = 820, H = 480;
+
+  // Color palette matching the site
+  const C = {
+    nodeFill:   '#fffdf8',
+    nodeStroke: '#222',
+    attending:  { fill:'#E1EEF8', stroke:'#005A8D' },
+    notAttending:{ fill:'#FBE7D9', stroke:'#A94A00' },
+    edgeMain:   '#4d4d4d',
+    edgeExit:   '#A94A00',
+    edgeWait:   '#555',
+    edgeEnroll: '#005A8D',
+    highlight:  '#0072B2',
+    highlightExit: '#A94A00',
+    dim:        'rgba(0,0,0,0.08)',
+    dimStroke:  '#ccc',
+    text:       '#1f2933',
+    muted:      '#4b5b68',
+  };
+
+  // Node positions (x,y = center, in viewBox coords)
+  const NODES = {
+    Apply:         { x:410, y:50,  label:'Apply',         w:120, h:38, style:'default' },
+    Waitlisted:    { x:160, y:160, label:'Waitlisted',    w:130, h:38, style:'default' },
+    Accepted:      { x:600, y:160, label:'Accepted',      w:130, h:38, style:'default' },
+    Register:      { x:600, y:270, label:'Register',      w:130, h:38, style:'default' },
+    Enroll:        { x:600, y:380, label:'Enroll',        w:130, h:38, style:'default' },
+    NotAttending:  { x:160, y:430, label:'Not Attending', w:140, h:38, style:'exit'    },
+    Attending:     { x:600, y:460, label:'Attending ✓',   w:130, h:38, style:'success' },
+  };
+
+  // Edges: from, to, label, style, edgeType, curve-control
+  const EDGES = [
+    { id:'apply_waitlisted',        from:'Apply',       to:'Waitlisted',   label:'Waitlisted',     type:'wait',    desc:'Applicant placed on waitlist at lottery' },
+    { id:'apply_accepted',          from:'Apply',       to:'Accepted',     label:'Accepted',       type:'main',    desc:'Applicant accepted directly at lottery' },
+    { id:'waitlisted_accepted',     from:'Waitlisted',  to:'Accepted',     label:'Off Waitlist',   type:'wait',    desc:'Applicant later accepted from waitlist' },
+    { id:'waitlisted_not_attending',from:'Waitlisted',  to:'NotAttending', label:'Stay Waitlisted',type:'exit',    desc:'Remained on waitlist — did not enroll' },
+    { id:'accepted_register',       from:'Accepted',    to:'Register',     label:'Register',       type:'main',    desc:'Applicant completed registration step' },
+    { id:'accepted_not_attending',  from:'Accepted',    to:'NotAttending', label:'Withdrew',       type:'exit',    desc:'Withdrew after acceptance, before registration' },
+    { id:'register_enroll',         from:'Register',    to:'Enroll',       label:'Enroll',         type:'main',    desc:'Applicant officially enrolled' },
+    { id:'register_not_attending',  from:'Register',    to:'NotAttending', label:'Withdrew',       type:'exit',    desc:'Withdrew after registration, before enrollment' },
+    { id:'enroll_attending',        from:'Enroll',      to:'Attending',    label:'Shows Up',       type:'success', desc:'Student attended school — enrolled and attending' },
+    { id:'enroll_not_attending',    from:'Enroll',      to:'NotAttending', label:'No Show',        type:'exit',    desc:'Enrolled but never showed up (no show)' },
+  ];
+
+  // Which edges are active per path pill
+  const PATH_EDGES = {
+    enrolled:                ['apply_accepted','accepted_register','register_enroll','enroll_attending'],
+    enrolled_waitlist:       ['apply_waitlisted','waitlisted_accepted','accepted_register','register_enroll','enroll_attending'],
+    withdrew_after_acceptance:['apply_accepted','accepted_not_attending'],
+    withdrew_after_registration:['apply_accepted','accepted_register','register_not_attending'],
+    no_show:                 ['apply_accepted','accepted_register','register_enroll','enroll_not_attending'],
+    stayed_waitlisted:       ['apply_waitlisted','waitlisted_not_attending'],
+  };
+
+  let activeEdges = new Set();
+  let highlightActive = false;
+
+  // ── helpers ────────────────────────────────────────────────────────────────
+  function ns(tag, attrs={}) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+
+  function nodeColor(n) {
+    if (n.style === 'success') return C.attending;
+    if (n.style === 'exit')    return C.notAttending;
+    return { fill: C.nodeFill, stroke: C.nodeStroke };
+  }
+
+  // Compute edge path as straight line with slight curve for diagonals
+  function edgePath(e) {
+    const A = NODES[e.from], B = NODES[e.to];
+    // Determine exit point from A and entry point to B
+    let ax = A.x, ay = A.y, bx = B.x, by = B.y;
+
+    // Adjust to node edges (not centers)
+    const hw_a = A.w/2, hh_a = A.h/2;
+    const hw_b = B.w/2, hh_b = B.h/2;
+
+    // Direction
+    const dx = bx - ax, dy = by - ay;
+
+    // Exit from A: pick nearest face
+    if (Math.abs(dx) > Math.abs(dy)) {
+      ax += dx > 0 ? hw_a : -hw_a;
+    } else {
+      ay += dy > 0 ? hh_a : -hh_a;
+    }
+
+    // Entry to B
+    if (Math.abs(dx) > Math.abs(dy)) {
+      bx += dx > 0 ? -hw_b : hw_b;
+    } else {
+      by += dy > 0 ? -hh_b : hh_b;
+    }
+
+    // Slight bezier pull
+    const cx = (ax+bx)/2, cy = (ay+by)/2;
+    const perp = 18; // curve amount
+    let cpx = cx, cpy = cy;
+    if (Math.abs(dx) > 10 && Math.abs(dy) > 10) {
+      // Diagonal — pull to avoid overlap
+      cpx = cx - (dy/Math.hypot(dx,dy)) * perp;
+      cpy = cy + (dx/Math.hypot(dx,dy)) * perp;
+    }
+
+    return { path: `M${ax},${ay} Q${cpx},${cpy} ${bx},${by}`, ax, ay, bx, by, cpx, cpy };
+  }
+
+  function arrowHead(bx, by, cpx, cpy) {
+    const dx = bx - cpx, dy = by - cpy;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx/len, uy = dy/len;
+    const s = 9;
+    const lx = bx - ux*s + uy*s*0.5;
+    const ly = by - uy*s - ux*s*0.5;
+    const rx = bx - ux*s - uy*s*0.5;
+    const ry = by - uy*s + ux*s*0.5;
+    return `M${bx},${by} L${lx},${ly} L${rx},${ry} Z`;
+  }
+
+  function edgeStroke(e) {
+    if (e.type === 'exit')    return C.edgeExit;
+    if (e.type === 'wait')    return C.edgeWait;
+    if (e.type === 'success') return C.edgeEnroll;
+    return C.edgeMain;
+  }
+
+  function edgeDash(e) {
+    if (e.type === 'exit')    return '6,4';
+    if (e.type === 'success') return '7,4';
+    return 'none';
+  }
+
+  function edgeWidth(e) {
+    return e.type === 'main' || e.type === 'success' ? 2.5 : 2;
+  }
+
+  // ── RENDER ─────────────────────────────────────────────────────────────────
+  const defs = ns('defs');
+  svg.appendChild(defs);
+
+  // Draw edges
+  const edgeGroup = ns('g', { id:'edges' });
+  svg.appendChild(edgeGroup);
+
+  const edgeEls = {}; // id -> {path, arrow, label}
+
+  EDGES.forEach(e => {
+    const { path: d, bx, by, cpx, cpy } = edgePath(e);
+    const stroke = edgeStroke(e);
+    const dash = edgeDash(e);
+    const sw = edgeWidth(e);
+
+    const g = ns('g');
+
+    const pathEl = ns('path', {
+      d, fill:'none', stroke, 'stroke-width': sw,
+      'stroke-dasharray': dash, 'stroke-linecap':'round',
+      opacity: '0.6',
+    });
+    g.appendChild(pathEl);
+
+    const arrowEl = ns('path', {
+      d: arrowHead(bx, by, cpx, cpy),
+      fill: stroke, opacity: '0.6',
+    });
+    g.appendChild(arrowEl);
+
+    // Hit target (invisible wide line for hover)
+    const hitEl = ns('path', {
+      d, fill:'none', stroke:'transparent', 'stroke-width':'14', cursor:'default',
+    });
+    hitEl.addEventListener('mouseenter', ev => showTT(ev, `<strong>${e.label}</strong><br>${e.desc}`));
+    hitEl.addEventListener('mousemove',  moveTT);
+    hitEl.addEventListener('mouseleave', hideTT);
+    g.appendChild(hitEl);
+
+    // Edge label
+    const A = NODES[e.from], B = NODES[e.to];
+    const mx = (A.x + B.x)/2, my = (A.y + B.y)/2;
+    const labelEl = ns('text', {
+      x: mx, y: my - 6,
+      'text-anchor':'middle', 'font-size':'11', fill: stroke,
+      opacity:'0.8', 'pointer-events':'none',
+    });
+    labelEl.textContent = e.label;
+    g.appendChild(labelEl);
+
+    edgeGroup.appendChild(g);
+    edgeEls[e.id] = { g, pathEl, arrowEl, labelEl };
+  });
+
+  // Draw nodes
+  const nodeGroup = ns('g', { id:'nodes' });
+  svg.appendChild(nodeGroup);
+
+  const nodeEls = {};
+
+  Object.entries(NODES).forEach(([id, n]) => {
+    const col = nodeColor(n);
+    const g = ns('g', { cursor:'default' });
+
+    const rx = n.x - n.w/2, ry = n.y - n.h/2;
+
+    const rect = ns('rect', {
+      x: rx, y: ry, width: n.w, height: n.h,
+      rx: 7, ry: 7,
+      fill: col.fill, stroke: col.stroke, 'stroke-width': n.style === 'default' ? 1.5 : 2,
+    });
+    if (n.style === 'exit') {
+      rect.setAttribute('stroke-dasharray', '5,3');
+    }
+    g.appendChild(rect);
+
+    const text = ns('text', {
+      x: n.x, y: n.y + 5,
+      'text-anchor':'middle', 'font-size': '13', 'font-weight': 'bold',
+      fill: n.style === 'success' ? '#005A8D' : n.style === 'exit' ? '#A94A00' : C.text,
+      'pointer-events':'none',
+    });
+    text.textContent = n.label;
+    g.appendChild(text);
+
+    // hover
+    g.addEventListener('mouseenter', ev => {
+      const desc = id === 'Apply' ? 'All applicants enter here'
+        : id === 'Waitlisted' ? 'Placed on waitlist at lottery'
+        : id === 'Accepted' ? 'Accepted at lottery or off waitlist'
+        : id === 'Register' ? 'Completed registration step'
+        : id === 'Enroll' ? 'Officially enrolled'
+        : id === 'Attending' ? 'Attending school — full enrollment'
+        : 'Did not enroll — left the process';
+      showTT(ev, `<strong>${n.label}</strong><br>${desc}`);
+      rect.setAttribute('filter', 'url(#shadow)');
+    });
+    g.addEventListener('mousemove',  moveTT);
+    g.addEventListener('mouseleave', () => { hideTT(); rect.removeAttribute('filter'); });
+
+    nodeGroup.appendChild(g);
+    nodeEls[id] = { g, rect };
+  });
+
+  // Drop shadow filter
+  const filter = ns('filter', { id:'shadow', x:'-20%', y:'-20%', width:'140%', height:'140%' });
+  const fe = ns('feDropShadow', { dx:'0', dy:'2', stdDeviation:'3', 'flood-color':'rgba(0,0,0,0.15)' });
+  filter.appendChild(fe);
+  defs.appendChild(filter);
+
+  // ── HIGHLIGHT LOGIC ────────────────────────────────────────────────────────
+  function applyHighlight() {
+    if (!highlightActive) {
+      // Reset all to normal
+      Object.values(edgeEls).forEach(({ g, pathEl, arrowEl, labelEl }) => {
+        pathEl.setAttribute('opacity', '0.6');
+        arrowEl.setAttribute('opacity', '0.6');
+        if (labelEl) labelEl.setAttribute('opacity', '0.8');
+      });
+      Object.values(nodeEls).forEach(({ rect }, idx) => {
+        const id = Object.keys(NODES)[idx];
+        const col = nodeColor(NODES[id]);
+        rect.setAttribute('fill', col.fill);
+        rect.setAttribute('stroke', col.stroke);
+      });
+      return;
+    }
+
+    // Dim all edges
+    Object.entries(edgeEls).forEach(([id, { pathEl, arrowEl, labelEl }]) => {
+      const isActive = activeEdges.has(id);
+      pathEl.setAttribute('opacity', isActive ? '1' : '0.1');
+      arrowEl.setAttribute('opacity', isActive ? '1' : '0.1');
+      if (labelEl) labelEl.setAttribute('opacity', isActive ? '1' : '0.05');
+      if (isActive) {
+        const e = EDGES.find(x => x.id === id);
+        const col = e.type === 'exit' ? C.highlightExit : C.highlight;
+        pathEl.setAttribute('stroke', col);
+        pathEl.setAttribute('stroke-width', '3.5');
+        arrowEl.setAttribute('fill', col);
+      } else {
+        const e = EDGES.find(x => x.id === id);
+        pathEl.setAttribute('stroke', edgeStroke(e));
+        pathEl.setAttribute('stroke-width', String(edgeWidth(e)));
+        arrowEl.setAttribute('fill', edgeStroke(e));
+      }
+    });
+
+    // Find touched nodes
+    const touchedNodes = new Set();
+    activeEdges.forEach(eid => {
+      const e = EDGES.find(x => x.id === eid);
+      if (e) { touchedNodes.add(e.from); touchedNodes.add(e.to); }
+    });
+
+    Object.entries(nodeEls).forEach(([id, { rect }]) => {
+      if (touchedNodes.has(id)) {
+        const col = nodeColor(NODES[id]);
+        rect.setAttribute('fill', col.fill);
+        rect.setAttribute('stroke', NODES[id].style === 'success' ? C.highlight : NODES[id].style === 'exit' ? C.highlightExit : C.highlight);
+        rect.setAttribute('stroke-width', '2.5');
+      } else {
+        rect.setAttribute('fill', '#f5f3ee');
+        rect.setAttribute('stroke', '#ccc');
+        rect.setAttribute('stroke-width', '1');
+      }
+    });
+  }
+
+  // Tooltip helpers
+  function showTT(ev, html) {
+    tt.innerHTML = html;
+    tt.style.opacity = '1';
+    moveTT(ev);
+  }
+  function moveTT(ev) {
+    tt.style.left = (ev.clientX + 14) + 'px';
+    tt.style.top  = (ev.clientY - 32) + 'px';
+  }
+  function hideTT() { tt.style.opacity = '0'; }
+
+  // Expose selectPath for pills
+  window.selectPath = function(el, pathId) {
+    const alreadyActive = el.classList.contains('active');
+    document.querySelectorAll('.path-pill').forEach(p => p.classList.remove('active'));
+    if (alreadyActive) {
+      activeEdges.clear();
+      highlightActive = false;
+    } else {
+      el.classList.add('active');
+      activeEdges = new Set(PATH_EDGES[pathId] || []);
+      highlightActive = true;
+    }
+    applyHighlight();
+  };
+
+  applyHighlight();
+})();
+</script>
+
+<script>
+// ── VEGA-LITE CHART ───────────────────────────────────────────────────────
+const spec = {"config":{"view":{"continuousWidth":300,"continuousHeight":300,"stroke":null},"axis":{"labelFontSize":13,"titleFontSize":14},"title":{"anchor":"start","fontSize":22}},"vconcat":[{"hconcat":[{"layer":[{"mark":{"type":"bar","color":"white","stroke":"#888888","strokeWidth":0.5},"encoding":{"x":{"field":"x0:Q","type":"quantitative"},"x2":{"field":"x1:Q"},"y":{"field":"y0:Q","type":"quantitative"},"y2":{"field":"y1:Q"}}},{"mark":{"type":"bar","color":"white","stroke":"black","strokeWidth":1.5},"encoding":{"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"x":{"field":"x0","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"x2":{"field":"x1"},"y":{"field":"y0","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"y2":{"field":"y1"},"stroke":{"field":"stroke","type":"nominal","scale":null,"legend":null},"fill":{"field":"fill","type":"nominal","scale":null,"legend":null},"strokeDash":{"condition":{"test":"datum.dash === 'dashed'","value":[5,3]},"value":[1,0]}}},{"mark":{"type":"text","fontSize":16,"fontWeight":"bold","color":"#111827","align":"center","baseline":"middle"},"encoding":{"x":{"field":"x","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"y":{"field":"y","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"text":{"field":"title","type":"nominal"},"opacity":{"field":"node_title_opacity","type":"quantitative","legend":null}}}],"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"lookup":"node","from":{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"key":"node","fields":["x","y","x0","x1","y0","y1","fill","stroke","dash"]}},{"calculate":"datum.count > 0 ? 1 : 0.15","as":"node_title_opacity"}],"width":700,"height":500,"title":"Applicant Journey Flow"},{"layer":[{"mark":{"type":"bar","color":"white","stroke":"black","strokeWidth":1.5},"encoding":{"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"x":{"field":"x0","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"x2":{"field":"x1"},"y":{"field":"y0","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"y2":{"field":"y1"},"stroke":{"field":"stroke","type":"nominal","scale":null,"legend":null},"fill":{"field":"fill","type":"nominal","scale":null,"legend":null},"strokeDash":{"condition":{"test":"datum.dash === 'dashed'","value":[5,3]},"value":[1,0]}}},{"mark":{"type":"text","fontSize":16,"fontWeight":"bold","color":"#111827","align":"center","baseline":"middle"},"encoding":{"x":{"field":"x","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"y":{"field":"y","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"text":{"field":"title","type":"nominal"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0}}}],"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"lookup":"node","from":{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"key":"node","fields":["x","y","x0","x1","y0","y1","fill","stroke","dash"]}},{"filter":"datum.count > 0"},{"calculate":"datum.count > 0 ? 1 : 0","as":"node_title_opacity"}],"width":700,"height":500}],"spacing":0},{"hconcat":[{"layer":[{"mark":{"type":"bar","tooltip":true},"encoding":{"color":{"condition":{"param":"path_select","field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"value":"#cccccc"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"x":{"field":"count","type":"quantitative","axis":{"title":"Applicants"}},"y":{"field":"outcome","type":"nominal","axis":null,"sort":["Attending","Not Attending"]},"tooltip":[{"field":"outcome","type":"nominal","title":"Outcome"},{"field":"count","type":"quantitative","title":"Applicants","format":","}]}},{"mark":{"type":"text","align":"left","dx":4,"fontSize":13},"encoding":{"color":{"condition":{"param":"path_select","field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"value":"#cccccc"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"text":{"field":"outcome","type":"nominal"},"x":{"field":"count","type":"quantitative"},"y":{"field":"outcome","type":"nominal","sort":["Attending","Not Attending"]}}}],"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"aggregate":[{"op":"sum","field":"count","as":"count"}],"groupby":["outcome","final_outcome"]}],"width":180,"height":100,"title":"Final Outcomes"},{"layer":[{"mark":{"type":"bar","tooltip":true},"encoding":{"color":{"field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"opacity":{"condition":{"param":"path_select","value":1,"empty":false},"value":0},"x":{"field":"count","type":"quantitative","axis":{"title":"Applicants"}},"y":{"field":"outcome","type":"nominal","axis":null,"sort":["Attending","Not Attending"]},"tooltip":[{"field":"outcome","type":"nominal","title":"Outcome"},{"field":"count","type":"quantitative","title":"Applicants","format":","},{"field":"share_label","type":"nominal","title":"Share of selected path"}]}},{"mark":{"type":"text","align":"left","dx":4,"fontSize":13},"encoding":{"color":{"field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"opacity":{"condition":{"param":"path_select","value":1,"empty":false},"value":0},"text":{"field":"share_label","type":"nominal"},"x":{"field":"count","type":"quantitative"},"y":{"field":"outcome","type":"nominal","sort":["Attending","Not Attending"]}}}],"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}},{"aggregate":[{"op":"sum","field":"count","as":"count"}],"groupby":["outcome","final_outcome"]},{"joinaggregate":[{"op":"sum","field":"count","as":"total"}]},{"calculate":"format(datum.count / datum.total * 100, '.1f') + '%'","as":"share_label"}],"width":180,"height":100}],"spacing":0}],"params":[{"name":"year_pick","bind":{"input":"select","options":["All","2023","2024","2025"],"name":"Year: "},"value":"All"},{"name":"school_pick","bind":{"input":"select","options":["All","Academy","Adams","Adventure","Agave","Alger","Allen","Amber","Amos","Andover","Annex","Anthem","Antler","Apollo","Appleton","Aquila","Arch","Arbor","Arcade","Archer","Arcola","Arizona","Arlington","Armstrong","Arrow","Artisan","Arvada","Ascent","Ashford","Ashgrove","Ashland","Ashton","Aspen","Aspire","Assembly","Athenian","Athens","Atlantic","Atlas","Atrium","Auburn","Audacious","Audubon","Augusta","Aurora","Austin","Avon","Aztec","Baldwin","Balsam","Bancroft","Bandera","Barrington","Beacon","Bel Air","Belgrade","Bell","Belmont","Benbrook","Benton","Berkshire","Beverly","Birchwood","Blue Ridge","Bluff","Bond","Boone","Boston","Boulder","Bravura","Brighton","Bristol","Broadway","Brookfield","Brookside","Brookwood","Brownstone","Bryan","Buchanan","Buckley","Buena Vista","Burlington","Burnett","Burton","Cabot","Cadence","Cambridge","Camden","Campbell","Candlewood","Canyon","Capella","Capitol","Cardinal","Carlisle","Carlton","Carmel","Carriage","Carroll","Carson","Cascade","Castillo","Cedar","Centennial","Century","Challenger","Champion","Chancellor","Chapman","Charter","Chelsea","Chester","Chestnut","Cheyenne","Chippewa","Christie","Citadel","Clarkson","Clearwater","Clifton","Clinton","Clover","Comet","Commerce","Compass","Concord","Condor","Continental","Converse","Copley","Copper","Cordova","Cornwall","Cottonwood","Covenant","Covington","Cranbrook","Crescent","Crest","Crestwood","Crossings","Crown","Crusade","Cumberland","Cypress","Dalton","Dearborn","Dedham","Deer","Deerfield","Del Mar","Delano","Delphi","Delta","Denali","Denton","Deerpath","Diamond","Discovery","Dove","Dover","Draper","Driftwood","Dunbar","Durham","Eagle","Eastbrook","Eastgate","Eastwood","Edison","Edson","Elder","Elm","Elmwood","Elton","Emerald","Emerson","Empire","Enfield","Enterprise","Equity","Erie","Essex","Ethan","Euclid","Evangel","Everest","Excelsior","Excel","Fairfield","Fairview","Falcon","Farmington","Fenton","Fernwood","Fillmore","Finch","Flagship","Fleming","Fletcher","Flint","Forest","Forrest","Forsyth","Forum","Foster","Fox","Franklin","Freedom","Fremont","Frontier","Fulton","Gables","Galaxy","Galleria","Garfield","Garrison","Gateway","Genesis","Geneva","George","Georgian","Glenwood","Globe","Golden","Goodrich","Grafton","Granada","Grand","Granite","Grant","Grasslands","Gravel","Grayson","Great Lakes","Greenfield","Greenstone","Greentree","Greenwich","Greenwood","Griffin","Grover","Hale","Hamilton","Hampshire","Hanover","Harbor","Harding","Harlan","Harmony","Harold","Harrison","Hartford","Harvard","Harvest","Hawthorne","Hazel","Heritage","Highland","Hillcrest","Hillside","Hillsboro","Hilton","Holland","Holloway","Holly","Holmes","Homer","Hometown","Hopkins","Horace","Horizon","Houston","Howard","Hudson","Humboldt","Huron","Hutchinson","Imperial","Independence","Indian","Inland","Inspiration","Integrity","Invictus","Iowa","Jackson","Jefferson","Jersey","Jordan","Journey","Jubilee","Julian","Juniper","Kansas","Kearney","Keller","Kelsey","Kenmore","Kent","Kimball","Kingston","Knox","Lakeview","Lakewood","Lamar","Lancaster","Landmark","Lantern","Laramie","Laredo","Lark","Larkspur","Laurel","Lawrence","Lawndale","Leader","Ledger","Legacy","Leland","Lenox","Lewis","Liberty","Lincoln","Linden","Lingo","Linwood","Logan","London","Longfellow","Lowell","Loyola","Lucent","Lynwood","Madison","Magnolia","Main","Majestic","Manchester","Manor","Maple","Mariner","Marion","Marquette","Marshall","Marvel","Mason","Maverick","Maxwell","Mayfair","McCord","McKinley","Meadow","Meridian","Metro","Midland","Midway","Milan","Millbrook","Millstone","Milton","Mission","Mohawk","Monroe","Montrose","Moraine","Morgan","Morris","Morton","Mosaic","Mound","Mount","Muir","Murray","Mystic","Nassau","Natchez","Nathan","Navigator","Nelson","Newport","Newton","Niagara","Noble","Nordic","Norfolk","Norman","Norris","Northbrook","Northfield","Northgate","Northwood","Norton","Norwood","Oak","Oakland","Oakwood","Odyssey","Ogle","Olympia","Omaha","Omega","Onyx","Oracle","Orion","Osborn","Osceola","Otis","Ottawa","Pacific","Palisade","Palmer","Palmetto","Palomar","Panther","Paramount","Parkside","Parkview","Patton","Pavilion","Peabody","Pecos","Pendleton","Penn","Perkins","Pershing","Phoenix","Piedmont","Pike","Pilgrim","Pima","Pioneer","Piper","Pittsburg","Plaza","Plymouth","Portage","Porter","Portland","Potomac","Prairie","Premier","Preston","Pride","Princeton","Prism","Prosper","Providence","Pueblo","Quincy","Raider","Raleigh","Ramona","Randolph","Ranger","Raven","Raymond","Reagan","Redwood","Reed","Regal","Regent","Renaissance","Reno","Resolve","Resolute","Reyes","Richmond","Ridgeline","Ridgewood","Riverbend","Riverside","Riviera","Roanoke","Robeson","Rochester","Rocket","Rockford","Rockwood","Roosevelt","Ross","Roxbury","Royal","Russell","Rutherford","Sable","Salem","Saline","Salinas","Saratoga","Savannah","Sawyer","Scholar","Scottsdale","Seabrook","Sentinel","Sequoia","Serenity","Shannon","Sheridan","Sherman","Sierra","Signal","Silver","Simmons","Skyline","Slate","Slater","Smith","Solano","Sonora","Southbrook","Southgate","Southridge","Southwood","Sovereign","Spartan","Spectrum","Spokane","Spring","Springfield","Spruce","Sterling","Stonebridge","Stonewall","Summit","Sumner","Sunridge","Sunrise","Sussex","Swanson","Sycamore","Taft","Taylor","Taylor Prep","Timberland","Triumph","Vanderbilt","Vanguard","Vista","Wake Forest","Walker","Walton","Warrendale","Wellspring Prep","Westfield","Westfield Prep","Willow","Windemere Park","Winterfield Venture","Winterville"],"name":"School: "},"value":"All"},{"name":"grade_pick","bind":{"input":"select","options":["All","Pre-K","K","1","2","3","4","5","6","7","8","9","10","11","12"],"name":"Grade: "},"value":"All"}],"spacing":24,"$schema":"https://vega.github.io/schema/vega-lite/v6.1.0.json"};
 
 const datasetUrls = {
   "data-c94b8840898a1e0b627d7187c1a998db":"interactive_viz_data/data-c94b8840898a1e0b627d7187c1a998db.json",
@@ -130,11 +546,11 @@ Promise.all(
   )
 ).then(entries => {
   spec.datasets = Object.fromEntries(entries);
-  document.getElementById("vis-placeholder").style.display = "none";
+  document.getElementById("vis-placeholder") && (document.getElementById("vis-placeholder").style.display = "none");
   document.getElementById("vis").style.display = "";
   return vegaEmbed("#vis", spec, { mode: "vega-lite", actions: false });
 }).catch(() => {
-  // Data files not available in current environment — viz will render on deployment
+  document.getElementById("vis-error").style.display = "block";
   console.info("Data files not found — visualization will render on GitHub Pages deployment.");
 });
 </script>
