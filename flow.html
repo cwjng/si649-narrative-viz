@@ -15,59 +15,27 @@
     .nav-links{display:flex;gap:22px;}
     .nav-links a{font-size:.8rem;color:var(--muted);text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;}
     .nav-links a:hover,.nav-links a.active{color:var(--text);}
-    .page{max-width:1200px;margin:0 auto;padding:28px 28px 60px;}
+    .page{max-width:1280px;margin:0 auto;padding:28px 28px 60px;}
     .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:20px;flex-wrap:wrap;}
     .page-header-left h1{font-size:1.9rem;font-weight:normal;margin-bottom:4px;}
     .page-header-left p{font-size:.9rem;color:var(--muted);}
-    .appendix-link{font-size:.78rem;color:var(--accent);text-decoration:none;white-space:nowrap;}
-    .appendix-link:hover{text-decoration:underline;}
 
     /* GUIDE */
     .guide{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:11px 18px;margin-bottom:22px;font-size:.85rem;color:var(--muted);line-height:1.55;}
     .guide strong{color:var(--text);}
 
-    #vis{margin:0 auto;}
+    /* VIS */
+    #vis{margin:0 auto;width:100%;}
     #vis.vega-embed{width:100%;display:flex;}
     #vis.vega-embed details,#vis.vega-embed details summary{position:relative;}
 
-    /* ERROR / LOADING */
+    /* ERROR */
     #vis-error{display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 36px;margin:20px 0;}
     #vis-error h3{font-size:1.1rem;font-weight:normal;margin-bottom:10px;color:var(--text);}
     #vis-error p{font-size:.87rem;color:var(--muted);line-height:1.55;margin-bottom:10px;}
     #vis-error code{font-family:'Courier New',monospace;font-size:.82rem;background:#f0ede6;padding:2px 6px;border-radius:3px;color:var(--text);}
     #vis-error ul{padding-left:18px;margin:8px 0;}
     #vis-error li{font-size:.84rem;color:var(--muted);margin-bottom:4px;}
-
-    /* INTERACTIVE FLOWCHART */
-    .flow-section{margin-bottom:32px;}
-    .flow-section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;}
-    .flow-section-title{font-size:1.25rem;font-weight:normal;color:var(--text);}
-    .flow-section-sub{font-size:.83rem;color:var(--muted);}
-    .flow-guide{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:18px;font-size:.82rem;color:var(--muted);line-height:1.5;}
-    .flow-guide strong{color:var(--text);}
-
-    #flow-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 20px;position:relative;overflow:hidden;}
-    #flow-svg-wrap{width:100%;overflow-x:auto;}
-    #flow-svg{display:block;margin:0 auto;}
-
-    /* Path highlight legend */
-    .flow-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted);}
-    .flow-legend-item{display:flex;align-items:center;gap:6px;}
-    .flow-legend-line{width:28px;height:3px;border-radius:2px;}
-    .flow-legend-line.success{background:#0072B2;}
-    .flow-legend-line.exit{background:#A94A00;border-top:2px dashed #A94A00;height:0;}
-    .flow-legend-line.waitlist{background:#666;}
-
-    /* Path selector */
-    .path-selector{margin-bottom:18px;}
-    .path-selector-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:8px;}
-    .path-pills{display:flex;flex-wrap:wrap;gap:7px;}
-    .path-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .18s;font-family:Georgia,serif;}
-    .path-pill:hover{border-color:var(--accent);color:var(--accent);}
-    .path-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-
-    /* Tooltip */
-    #flow-tooltip{position:fixed;background:var(--text);color:#fff;font-size:.78rem;padding:8px 12px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;max-width:220px;line-height:1.45;font-family:Georgia,serif;}
 
     /* CREDITS */
     footer{padding:26px 5% 28px;border-top:1px solid var(--border);background:var(--surface);}
@@ -104,23 +72,22 @@
   </div>
 
   <div class="guide">
-    <strong>How to use:</strong> Select a journey bar to highlight it across all panels &mdash; the flow diagram and outcome bars will update. Hover any element for counts. Double-click to deselect. Use the <strong>Year</strong>, <strong>School</strong>, and <strong>Grade</strong> dropdowns to filter.
+    <strong>How to use:</strong> Click a journey bar in <em>Top Ranked Applicant Outcomes</em> to highlight that path across all panels. The flow diagram dims unused routes and the outcome bars update. Hover any node or edge for counts. Double-click to deselect.
   </div>
 
   <div id="vis-error">
     <h3>Data files not found</h3>
     <p>This visualization requires 8 JSON data files in an <code>interactive_viz_data/</code> folder alongside this HTML file. The files could not be loaded in the current environment.</p>
-    <p><strong>To deploy on GitHub Pages:</strong> ensure the following folder structure exists in your repository:</p>
+    <p><strong>To deploy:</strong> ensure the following files exist relative to this HTML file:</p>
     <ul>
-      <li><code>index.html</code> (this file)</li>
-      <li><code>interactive_viz_data/data-c94b8840898a1e0b627d7187c1a998db.json</code></li>
-      <li><code>interactive_viz_data/data-dda4bfef52018bd40ca29976dcbd3eab.json</code></li>
-      <li><code>interactive_viz_data/data-e063c824dcd93a651c35a1e853d1a9a2.json</code></li>
-      <li><code>interactive_viz_data/data-d285a7403ed98ae579761d64a864032b.json</code></li>
-      <li><code>interactive_viz_data/data-86a1e9421f0314b075694370406257ab.json</code></li>
-      <li><code>interactive_viz_data/data-2da615531b26e383fca9f70fd55dd42b.json</code></li>
-      <li><code>interactive_viz_data/data-7eee8b534bba1831069c790277a6628c.json</code></li>
-      <li><code>interactive_viz_data/data-de30ca1fae70b3cc2dcebbf1131f2d22.json</code></li>
+      <li><code>interactive_viz_data/data-c94b8840898a1e0b627d7187c1a998db.json</code> — edge_counts</li>
+      <li><code>interactive_viz_data/data-dda4bfef52018bd40ca29976dcbd3eab.json</code> — node layout</li>
+      <li><code>interactive_viz_data/data-e063c824dcd93a651c35a1e853d1a9a2.json</code> — node_counts</li>
+      <li><code>interactive_viz_data/data-d285a7403ed98ae579761d64a864032b.json</code> — edge_path_counts</li>
+      <li><code>interactive_viz_data/data-86a1e9421f0314b075694370406257ab.json</code> — outcome_counts / selected_outcome_counts</li>
+      <li><code>interactive_viz_data/data-2da615531b26e383fca9f70fd55dd42b.json</code> — node_path_counts</li>
+      <li><code>interactive_viz_data/data-7eee8b534bba1831069c790277a6628c.json</code> — path_counts</li>
+      <li><code>interactive_viz_data/data-de30ca1fae70b3cc2dcebbf1131f2d22.json</code> — selected_outcome_counts</li>
     </ul>
   </div>
 
@@ -131,21 +98,501 @@
   </div>
 </div>
 
-<div id="flow-tooltip"></div>
-
 <script>
-// ── VEGA-LITE CHART ───────────────────────────────────────────────────────
-const spec = {"config":{"view":{"continuousWidth":300,"continuousHeight":300,"stroke":null},"axis":{"labelFontSize":13,"titleFontSize":14},"title":{"anchor":"start","fontSize":22}},"vconcat":[{"hconcat":[{"layer":[{"mark":{"type":"bar","color":"white","stroke":"#888888","strokeWidth":0.5},"encoding":{"x":{"field":"x0:Q","type":"quantitative"},"x2":{"field":"x1:Q"},"y":{"field":"y0:Q","type":"quantitative"},"y2":{"field":"y1:Q"}}},{"mark":{"type":"bar","color":"white","stroke":"black","strokeWidth":1.5},"encoding":{"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"x":{"field":"x0","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"x2":{"field":"x1"},"y":{"field":"y0","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"y2":{"field":"y1"},"stroke":{"field":"stroke","type":"nominal","scale":null,"legend":null},"fill":{"field":"fill","type":"nominal","scale":null,"legend":null},"strokeDash":{"condition":{"test":"datum.dash === 'dashed'","value":[5,3]},"value":[1,0]}}},{"mark":{"type":"text","fontSize":16,"fontWeight":"bold","color":"#111827","align":"center","baseline":"middle"},"encoding":{"x":{"field":"x","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"y":{"field":"y","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"text":{"field":"title","type":"nominal"},"opacity":{"field":"node_title_opacity","type":"quantitative","legend":null}}}],"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"lookup":"node","from":{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"key":"node","fields":["x","y","x0","x1","y0","y1","fill","stroke","dash"]}},{"calculate":"datum.count > 0 ? 1 : 0.15","as":"node_title_opacity"}],"width":700,"height":500,"title":"Applicant Journey Flow"},{"layer":[{"mark":{"type":"bar","color":"white","stroke":"black","strokeWidth":1.5},"encoding":{"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"x":{"field":"x0","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"x2":{"field":"x1"},"y":{"field":"y0","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"y2":{"field":"y1"},"stroke":{"field":"stroke","type":"nominal","scale":null,"legend":null},"fill":{"field":"fill","type":"nominal","scale":null,"legend":null},"strokeDash":{"condition":{"test":"datum.dash === 'dashed'","value":[5,3]},"value":[1,0]}}},{"mark":{"type":"text","fontSize":16,"fontWeight":"bold","color":"#111827","align":"center","baseline":"middle"},"encoding":{"x":{"field":"x","type":"quantitative","scale":{"domain":[0.2,9.8]},"axis":null},"y":{"field":"y","type":"quantitative","scale":{"domain":[0.4,9.7],"reverse":true},"axis":null},"text":{"field":"title","type":"nominal"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0}}}],"data":{"name":"data-e063c824dcd93a651c35a1e853d1a9a2"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"lookup":"node","from":{"data":{"name":"data-dda4bfef52018bd40ca29976dcbd3eab"},"key":"node","fields":["x","y","x0","x1","y0","y1","fill","stroke","dash"]}},{"filter":"datum.count > 0"},{"calculate":"datum.count > 0 ? 1 : 0","as":"node_title_opacity"}],"width":700,"height":500}],"spacing":0},{"hconcat":[{"layer":[{"mark":{"type":"bar","tooltip":true},"encoding":{"color":{"condition":{"param":"path_select","field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"value":"#cccccc"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"x":{"field":"count","type":"quantitative","axis":{"title":"Applicants"}},"y":{"field":"outcome","type":"nominal","axis":null,"sort":["Attending","Not Attending"]},"tooltip":[{"field":"outcome","type":"nominal","title":"Outcome"},{"field":"count","type":"quantitative","title":"Applicants","format":","}]}},{"mark":{"type":"text","align":"left","dx":4,"fontSize":13},"encoding":{"color":{"condition":{"param":"path_select","field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"value":"#cccccc"},"opacity":{"condition":{"param":"path_select","value":1,"empty":true},"value":0.3},"text":{"field":"outcome","type":"nominal"},"x":{"field":"count","type":"quantitative"},"y":{"field":"outcome","type":"nominal","sort":["Attending","Not Attending"]}}}],"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"aggregate":[{"op":"sum","field":"count","as":"count"}],"groupby":["outcome","final_outcome"]}],"width":180,"height":100,"title":"Final Outcomes"},{"layer":[{"mark":{"type":"bar","tooltip":true},"encoding":{"color":{"field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"opacity":{"condition":{"param":"path_select","value":1,"empty":false},"value":0},"x":{"field":"count","type":"quantitative","axis":{"title":"Applicants"}},"y":{"field":"outcome","type":"nominal","axis":null,"sort":["Attending","Not Attending"]},"tooltip":[{"field":"outcome","type":"nominal","title":"Outcome"},{"field":"count","type":"quantitative","title":"Applicants","format":","},{"field":"share_label","type":"nominal","title":"Share of selected path"}]}},{"mark":{"type":"text","align":"left","dx":4,"fontSize":13},"encoding":{"color":{"field":"final_outcome","type":"nominal","scale":{"domain":["Attending","Not Attending"],"range":["#0072B2","#D55E00"]},"legend":null},"opacity":{"condition":{"param":"path_select","value":1,"empty":false},"value":0},"text":{"field":"share_label","type":"nominal"},"x":{"field":"count","type":"quantitative"},"y":{"field":"outcome","type":"nominal","sort":["Attending","Not Attending"]}}}],"data":{"name":"data-86a1e9421f0314b075694370406257ab"},"transform":[{"filter":"datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick"},{"filter":{"param":"path_select"}},{"aggregate":[{"op":"sum","field":"count","as":"count"}],"groupby":["outcome","final_outcome"]},{"joinaggregate":[{"op":"sum","field":"count","as":"total"}]},{"calculate":"format(datum.count / datum.total * 100, '.1f') + '%'","as":"share_label"}],"width":180,"height":100}],"spacing":0}],"params":[{"name":"year_pick","bind":{"input":"select","options":["All","2023","2024","2025"],"name":"Year: "},"value":"All"},{"name":"school_pick","bind":{"input":"select","options":["All","Academy","Adams","Adventure","Agave","Alger","Allen","Amber","Amos","Andover","Annex","Anthem","Antler","Apollo","Appleton","Aquila","Arch","Arbor","Arcade","Archer","Arcola","Arizona","Arlington","Armstrong","Arrow","Artisan","Arvada","Ascent","Ashford","Ashgrove","Ashland","Ashton","Aspen","Aspire","Assembly","Athenian","Athens","Atlantic","Atlas","Atrium","Auburn","Audacious","Audubon","Augusta","Aurora","Austin","Avon","Aztec","Baldwin","Balsam","Bancroft","Bandera","Barrington","Beacon","Bel Air","Belgrade","Bell","Belmont","Benbrook","Benton","Berkshire","Beverly","Birchwood","Blue Ridge","Bluff","Bond","Boone","Boston","Boulder","Bravura","Brighton","Bristol","Broadway","Brookfield","Brookside","Brookwood","Brownstone","Bryan","Buchanan","Buckley","Buena Vista","Burlington","Burnett","Burton","Cabot","Cadence","Cambridge","Camden","Campbell","Candlewood","Canyon","Capella","Capitol","Cardinal","Carlisle","Carlton","Carmel","Carriage","Carroll","Carson","Cascade","Castillo","Cedar","Centennial","Century","Challenger","Champion","Chancellor","Chapman","Charter","Chelsea","Chester","Chestnut","Cheyenne","Chippewa","Christie","Citadel","Clarkson","Clearwater","Clifton","Clinton","Clover","Comet","Commerce","Compass","Concord","Condor","Continental","Converse","Copley","Copper","Cordova","Cornwall","Cottonwood","Covenant","Covington","Cranbrook","Crescent","Crest","Crestwood","Crossings","Crown","Crusade","Cumberland","Cypress","Dalton","Dearborn","Dedham","Deer","Deerfield","Del Mar","Delano","Delphi","Delta","Denali","Denton","Deerpath","Diamond","Discovery","Dove","Dover","Draper","Driftwood","Dunbar","Durham","Eagle","Eastbrook","Eastgate","Eastwood","Edison","Edson","Elder","Elm","Elmwood","Elton","Emerald","Emerson","Empire","Enfield","Enterprise","Equity","Erie","Essex","Ethan","Euclid","Evangel","Everest","Excelsior","Excel","Fairfield","Fairview","Falcon","Farmington","Fenton","Fernwood","Fillmore","Finch","Flagship","Fleming","Fletcher","Flint","Forest","Forrest","Forsyth","Forum","Foster","Fox","Franklin","Freedom","Fremont","Frontier","Fulton","Gables","Galaxy","Galleria","Garfield","Garrison","Gateway","Genesis","Geneva","George","Georgian","Glenwood","Globe","Golden","Goodrich","Grafton","Granada","Grand","Granite","Grant","Grasslands","Gravel","Grayson","Great Lakes","Greenfield","Greenstone","Greentree","Greenwich","Greenwood","Griffin","Grover","Hale","Hamilton","Hampshire","Hanover","Harbor","Harding","Harlan","Harmony","Harold","Harrison","Hartford","Harvard","Harvest","Hawthorne","Hazel","Heritage","Highland","Hillcrest","Hillside","Hillsboro","Hilton","Holland","Holloway","Holly","Holmes","Homer","Hometown","Hopkins","Horace","Horizon","Houston","Howard","Hudson","Humboldt","Huron","Hutchinson","Imperial","Independence","Indian","Inland","Inspiration","Integrity","Invictus","Iowa","Jackson","Jefferson","Jersey","Jordan","Journey","Jubilee","Julian","Juniper","Kansas","Kearney","Keller","Kelsey","Kenmore","Kent","Kimball","Kingston","Knox","Lakeview","Lakewood","Lamar","Lancaster","Landmark","Lantern","Laramie","Laredo","Lark","Larkspur","Laurel","Lawrence","Lawndale","Leader","Ledger","Legacy","Leland","Lenox","Lewis","Liberty","Lincoln","Linden","Lingo","Linwood","Logan","London","Longfellow","Lowell","Loyola","Lucent","Lynwood","Madison","Magnolia","Main","Majestic","Manchester","Manor","Maple","Mariner","Marion","Marquette","Marshall","Marvel","Mason","Maverick","Maxwell","Mayfair","McCord","McKinley","Meadow","Meridian","Metro","Midland","Midway","Milan","Millbrook","Millstone","Milton","Mission","Mohawk","Monroe","Montrose","Moraine","Morgan","Morris","Morton","Mosaic","Mound","Mount","Muir","Murray","Mystic","Nassau","Natchez","Nathan","Navigator","Nelson","Newport","Newton","Niagara","Noble","Nordic","Norfolk","Norman","Norris","Northbrook","Northfield","Northgate","Northwood","Norton","Norwood","Oak","Oakland","Oakwood","Odyssey","Ogle","Olympia","Omaha","Omega","Onyx","Oracle","Orion","Osborn","Osceola","Otis","Ottawa","Pacific","Palisade","Palmer","Palmetto","Palomar","Panther","Paramount","Parkside","Parkview","Patton","Pavilion","Peabody","Pecos","Pendleton","Penn","Perkins","Pershing","Phoenix","Piedmont","Pike","Pilgrim","Pima","Pioneer","Piper","Pittsburg","Plaza","Plymouth","Portage","Porter","Portland","Potomac","Prairie","Premier","Preston","Pride","Princeton","Prism","Prosper","Providence","Pueblo","Quincy","Raider","Raleigh","Ramona","Randolph","Ranger","Raven","Raymond","Reagan","Redwood","Reed","Regal","Regent","Renaissance","Reno","Resolve","Resolute","Reyes","Richmond","Ridgeline","Ridgewood","Riverbend","Riverside","Riviera","Roanoke","Robeson","Rochester","Rocket","Rockford","Rockwood","Roosevelt","Ross","Roxbury","Royal","Russell","Rutherford","Sable","Salem","Saline","Salinas","Saratoga","Savannah","Sawyer","Scholar","Scottsdale","Seabrook","Sentinel","Sequoia","Serenity","Shannon","Sheridan","Sherman","Sierra","Signal","Silver","Simmons","Skyline","Slate","Slater","Smith","Solano","Sonora","Southbrook","Southgate","Southridge","Southwood","Sovereign","Spartan","Spectrum","Spokane","Spring","Springfield","Spruce","Sterling","Stonebridge","Stonewall","Summit","Sumner","Sunridge","Sunrise","Sussex","Swanson","Sycamore","Taft","Taylor","Taylor Prep","Timberland","Triumph","Vanderbilt","Vanguard","Vista","Wake Forest","Walker","Walton","Warrendale","Wellspring Prep","Westfield","Westfield Prep","Willow","Windemere Park","Winterfield Venture","Winterville"],"name":"School: "},"value":"All"},{"name":"grade_pick","bind":{"input":"select","options":["All","Pre-K","K","1","2","3","4","5","6","7","8","9","10","11","12"],"name":"Grade: "},"value":"All"}],"spacing":24,"$schema":"https://vega.github.io/schema/vega-lite/v6.1.0.json"};
+// ─────────────────────────────────────────────────────────────────────────────
+// Vega-Lite spec rebuilt from interactive_viz.ipynb (final dashboard cell).
+//
+// Layout (matching notebook):
+//   vconcat(
+//     hconcat(path_chart [760×300], outcome_chart [300×300]),
+//     hconcat(spacer [191×500], flow_chart [700×500], spacer [191×500])
+//   )
+//
+// Data name → dataset hash mapping:
+//   edge_counts            → data-c94b8840898a1e0b627d7187c1a998db
+//   node_layout            → data-dda4bfef52018bd40ca29976dcbd3eab
+//   node_counts            → data-e063c824dcd93a651c35a1e853d1a9a2
+//   edge_path_counts       → data-d285a7403ed98ae579761d64a864032b
+//   outcome_counts         → data-86a1e9421f0314b075694370406257ab  (rows where path is null)
+//   node_path_counts       → data-2da615531b26e383fca9f70fd55dd42b
+//   path_counts            → data-7eee8b534bba1831069c790277a6628c
+//   selected_outcome_counts→ data-de30ca1fae70b3cc2dcebbf1131f2d22
+// ─────────────────────────────────────────────────────────────────────────────
 
+const FILTER = "datum.year_option == year_pick && datum.school_option == school_pick && datum.grade_option == grade_pick";
+const DASH_SCALE = {"domain":["solid","dashed","dotted"],"range":[[1,0],[7,4],[1,5]]};
+const SEL_ACTIVE = "length(data('path_select_store'))";
+const DOM_X = [0.2, 9.8];
+const DOM_Y = [0.4, 9.7];
+// path_label_space and path_chart_max are computed from data at runtime; we use
+// the notebook-derived values (path_counts.count.max() ≈ 91,757 for "All"):
+//   path_label_space = max(int(91757 * 1.55), 120000) = 142,223  → 142223
+//   path_chart_max   = max(int(91757 * 1.12), 1000)  = 102,767  → 102767
+// These are baked into the scale domains just like the notebook does.
+const PATH_LABEL_SPACE = 142223;
+const PATH_CHART_MAX   = 102767;
+
+const spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.1.0.json",
+  "config": {
+    "view": {"continuousWidth": 300, "continuousHeight": 300, "stroke": null},
+    "axis": {"labelFontSize": 13, "titleFontSize": 14},
+    "title": {"anchor": "start", "fontSize": 22}
+  },
+  "params": [
+    {
+      "name": "year_pick",
+      "value": "All",
+      "bind": {"input": "select", "options": ["All","2023","2024","2025"], "name": "Year: "}
+    },
+    {
+      "name": "school_pick",
+      "value": "All",
+      "bind": {"input": "select", "options": ["All","Achieve","Advantage","Alliance","Andrew J. Brown","Apex","Arbor Prep","Aspire","Atlanta Heights","Bennett Venture","Brooklyn Dreams","Brooklyn Excelsior","Brooklyn Scholars","Buffalo United","Burton Glen","Canton","Canton Prep","Capstone","Center Line","Chandler Woods","Cross Creek","Detroit Enterprise","Detroit Merit","Detroit Premier","Eagle Crest","East Arbor","Emerson","Endeavor","Excel","Flagship","Forsyth","Fortis","Foundations","Four Points","Gate City","Grand River","Grand River Prep","Great Oaks","Greensboro","Hamtramck","Holly Park","Inspire","Johnston","Keystone","Knapp","Landmark","Laurus","Legacy","Linden","Matthews","Metro","Mill Creek","Milwaukee Scholars","Mountain View","North Dayton","North Oak","North Saginaw","Oakside Prep","Orion","Paragon","Paramount","Pathway","Peak","Pembroke","Phoenix","Pinnacle","Plymouth","PreEminent","PrepNet Virtual","Prevail","Queen's Grant","Quest","Reach","Regent Park","Research Triangle","Ridge Park","River City","Riverton Street","Rolesville","Sky Ranch","South Arbor","South Canton","South Pointe","Southside","Stambaugh","Summerfield","Summit Creek","Taylor","Taylor Prep","Timberland","Triumph","Vanderbilt","Vanguard","Vista","Wake Forest","Walker","Walton","Warrendale","Wellspring Prep","Westfield","Westfield Prep","Willow","Windemere Park","Winterfield Venture","Winterville"], "name": "School: "}
+    },
+    {
+      "name": "grade_pick",
+      "value": "All",
+      "bind": {"input": "select", "options": ["All","Pre-K","K","1","2","3","4","5","6","7","8","9","10","11","12"], "name": "Grade: "}
+    }
+  ],
+  "spacing": 24,
+  "vconcat": [
+
+    // ── ROW 1: path_chart + outcome_chart ─────────────────────────────────
+    {
+      "spacing": 22,
+      "hconcat": [
+
+        // ── path_chart (Top Ranked Applicant Outcomes) ──────────────────
+        {
+          "title": "Top Ranked Applicant Outcomes",
+          "width": 760,
+          "height": 300,
+          "data": {"name": "data-7eee8b534bba1831069c790277a6628c"},
+          "transform": [
+            {"filter": FILTER},
+            {"filter": "datum.count > 0"},
+            {
+              "window": [{"op": "rank", "field": "count", "as": "rank"}],
+              "sort": [{"field": "count", "order": "descending"}]
+            },
+            {"filter": "datum.rank <= 8"},
+            {"calculate": "'P' + format(datum.rank, '.0f')", "as": "path_id"},
+            {"calculate": `${-PATH_LABEL_SPACE}`, "as": "label_start"},
+            {"calculate": "0", "as": "label_end"},
+            {"calculate": `${-PATH_LABEL_SPACE + 2000}`, "as": "label_anchor"},
+            {"calculate": "format(datum.count, ',')", "as": "count_text"}
+          ],
+          "layer": [
+            // background label band
+            {
+              "mark": {"type": "bar", "color": "white", "opacity": 0.97},
+              "encoding": {
+                "y": {"field": "path_id", "type": "nominal", "sort": {"field": "rank", "order": "ascending"}, "axis": null},
+                "x": {"field": "label_start", "type": "quantitative", "scale": {"domain": [-PATH_LABEL_SPACE, PATH_CHART_MAX]}, "axis": {"title": "Applicants"}},
+                "x2": {"field": "label_end"},
+                "opacity": {"condition": {"param": "path_select", "value": 0.99, "empty": true}, "value": 0.86},
+                "stroke": {"condition": {"param": "path_select", "value": "#111827"}, "value": "#d7dde4"},
+                "strokeWidth": {"condition": {"param": "path_select", "value": 2.4}, "value": 0.8}
+              }
+            },
+            // colored bars
+            {
+              "mark": {"type": "bar", "cornerRadiusEnd": 4, "fillOpacity": 0.84},
+              "encoding": {
+                "y": {"field": "path_id", "type": "nominal", "sort": {"field": "rank", "order": "ascending"}, "axis": null},
+                "x": {"field": "count", "type": "quantitative", "scale": {"domain": [-PATH_LABEL_SPACE, PATH_CHART_MAX]}, "axis": {"title": "Applicants"}},
+                "x2": {"datum": 0},
+                "color": {"field": "outcome_fill", "type": "nominal", "scale": null, "legend": null},
+                "stroke": {"field": "outcome_stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "outcome_dash", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "strokeWidth": {"condition": {"param": "path_select", "value": 4}, "value": 2.2},
+                "opacity": {"condition": {"param": "path_select", "value": 1, "empty": true}, "value": 0.24},
+                "tooltip": [
+                  {"field": "path", "type": "nominal", "title": "Path"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","},
+                  {"field": "final_outcome", "type": "nominal", "title": "Outcome"}
+                ]
+              }
+            },
+            // P1, P2… id labels
+            {
+              "mark": {"type": "text", "align": "left", "baseline": "middle", "fontSize": 14, "fontWeight": "bold"},
+              "encoding": {
+                "y": {"field": "path_id", "type": "nominal", "sort": {"field": "rank", "order": "ascending"}, "axis": null},
+                "x": {"field": "label_anchor", "type": "quantitative", "scale": {"domain": [-PATH_LABEL_SPACE, PATH_CHART_MAX]}, "axis": null},
+                "text": {"field": "path_id", "type": "nominal"},
+                "color": {"field": "outcome_stroke", "type": "nominal", "scale": null, "legend": null},
+                "opacity": {"condition": {"param": "path_select", "value": 1, "empty": true}, "value": 0.38},
+                "tooltip": [
+                  {"field": "path", "type": "nominal", "title": "Path"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","},
+                  {"field": "final_outcome", "type": "nominal", "title": "Outcome"}
+                ]
+              }
+            },
+            // path description labels
+            {
+              "mark": {"type": "text", "align": "left", "baseline": "middle", "fontSize": 14, "dx": 44, "color": "#263238"},
+              "encoding": {
+                "y": {"field": "path_id", "type": "nominal", "sort": {"field": "rank", "order": "ascending"}, "axis": null},
+                "x": {"field": "label_anchor", "type": "quantitative", "scale": {"domain": [-PATH_LABEL_SPACE, PATH_CHART_MAX]}, "axis": null},
+                "text": {"field": "path_label", "type": "nominal"},
+                "opacity": {"condition": {"param": "path_select", "value": 1, "empty": true}, "value": 0.38},
+                "tooltip": [
+                  {"field": "path", "type": "nominal", "title": "Path"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","},
+                  {"field": "final_outcome", "type": "nominal", "title": "Outcome"}
+                ]
+              }
+            },
+            // count labels (right of bar)
+            {
+              "mark": {"type": "text", "align": "left", "baseline": "bottom", "dx": 6, "dy": -2, "fontSize": 13, "fontWeight": "bold", "color": "#263238"},
+              "encoding": {
+                "y": {"field": "path_id", "type": "nominal", "sort": {"field": "rank", "order": "ascending"}, "axis": null},
+                "x": {"field": "count", "type": "quantitative", "scale": {"domain": [-PATH_LABEL_SPACE, PATH_CHART_MAX]}, "axis": null},
+                "text": {"field": "count_text", "type": "nominal"},
+                "opacity": {"condition": {"param": "path_select", "value": 1, "empty": true}, "value": 0.38}
+              }
+            },
+            // invisible click target — carries path_select param
+            {
+              "name": "path_click_target",
+              "mark": {"type": "bar", "opacity": 0.001, "cursor": "pointer"},
+              "params": [{
+                "name": "path_select",
+                "select": {"type": "point", "fields": ["path"], "on": "click", "clear": "dblclick"},
+                "value": null
+              }],
+              "encoding": {
+                "y": {"field": "path_id", "type": "nominal", "sort": {"field": "rank", "order": "ascending"}, "axis": null},
+                "x": {"field": "label_start", "type": "quantitative", "scale": {"domain": [-PATH_LABEL_SPACE, PATH_CHART_MAX]}, "axis": {"title": "Applicants"}},
+                "x2": {"datum": PATH_CHART_MAX}
+              }
+            }
+          ]
+        },
+
+        // ── outcome_chart (Final Outcomes) ──────────────────────────────
+        {
+          "title": "Final Outcomes",
+          "width": 300,
+          "height": 300,
+          "layer": [
+            // base outcome bars (all applicants)
+            {
+              "data": {"name": "data-86a1e9421f0314b075694370406257ab"},
+              "transform": [{"filter": FILTER}],
+              "mark": {"type": "bar", "cornerRadiusTopLeft": 6, "cornerRadiusTopRight": 6, "width": 96, "fillOpacity": 0.84, "strokeWidth": 2.2},
+              "encoding": {
+                "x": {"field": "outcome", "type": "nominal", "title": null},
+                "y": {"field": "count", "type": "quantitative", "title": "Applicants"},
+                "color": {"field": "outcome_fill", "type": "nominal", "scale": null, "legend": null},
+                "stroke": {"field": "outcome_stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "outcome_dash", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "tooltip": [
+                  {"field": "outcome", "type": "nominal", "title": "Outcome"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","}
+                ]
+              }
+            },
+            // count labels above bars
+            {
+              "data": {"name": "data-86a1e9421f0314b075694370406257ab"},
+              "transform": [{"filter": FILTER}],
+              "mark": {"type": "text", "dy": -8, "fontSize": 14, "fontWeight": "bold", "color": "#263238"},
+              "encoding": {
+                "x": {"field": "outcome", "type": "nominal", "title": null},
+                "y": {"field": "count", "type": "quantitative", "title": "Applicants"},
+                "text": {"field": "count_text", "type": "nominal"}
+              }
+            },
+            // selected-path overlay bars (narrower, semi-transparent)
+            {
+              "data": {"name": "data-de30ca1fae70b3cc2dcebbf1131f2d22"},
+              "transform": [
+                {"filter": FILTER},
+                {"filter": {"param": "path_select"}},
+                {"joinaggregate": [{"op": "distinct", "field": "path", "as": "selected_path_count"}]},
+                {"filter": "datum.selected_path_count == 1"}
+              ],
+              "mark": {"type": "bar", "width": 42, "fillOpacity": 0.45, "strokeWidth": 2.6},
+              "encoding": {
+                "x": {"field": "outcome", "type": "nominal", "title": null},
+                "y": {"field": "count", "type": "quantitative", "title": "Applicants"},
+                "color": {"field": "outcome_fill", "type": "nominal", "scale": null, "legend": null},
+                "stroke": {"field": "outcome_stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "outcome_dash", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "tooltip": [
+                  {"field": "path", "type": "nominal", "title": "Selected path"},
+                  {"field": "outcome", "type": "nominal", "title": "Outcome"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants in path", "format": ","},
+                  {"field": "share", "type": "quantitative", "title": "Share of outcome", "format": ".1%"}
+                ]
+              }
+            },
+            // share % labels for selected path
+            {
+              "data": {"name": "data-de30ca1fae70b3cc2dcebbf1131f2d22"},
+              "transform": [
+                {"filter": FILTER},
+                {"filter": {"param": "path_select"}},
+                {"joinaggregate": [{"op": "distinct", "field": "path", "as": "selected_path_count"}]},
+                {"filter": "datum.selected_path_count == 1"}
+              ],
+              "mark": {"type": "text", "dy": -8, "fontSize": 13, "fontWeight": "bold", "color": "#111827"},
+              "encoding": {
+                "x": {"field": "outcome", "type": "nominal", "title": null},
+                "y": {"field": "count", "type": "quantitative", "title": "Applicants"},
+                "text": {"field": "share_label", "type": "nominal"}
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    // ── ROW 2: spacer + flow_chart + spacer ───────────────────────────────
+    {
+      "spacing": 0,
+      "hconcat": [
+        // left spacer
+        {
+          "data": {"values": [{"x": 0}]},
+          "mark": {"type": "point", "opacity": 0},
+          "encoding": {"x": {"field": "x", "type": "quantitative", "axis": null}},
+          "width": 191,
+          "height": 500
+        },
+
+        // ── flow_chart ────────────────────────────────────────────────
+        {
+          "title": "Applicant Journey Flow",
+          "width": 700,
+          "height": 500,
+          "layer": [
+
+            // ── background edge lines (edge_counts) ─────────────────
+            {
+              "data": {"name": "data-c94b8840898a1e0b627d7187c1a998db"},
+              "transform": [
+                {"filter": FILTER},
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.14 : 0.04) : (datum.count > 0 ? 0.45 : 0.14)`,
+                  "as": "edge_opacity"
+                },
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.3 : 0.12) : (datum.count > 0 ? 1 : 0.45)`,
+                  "as": "edge_label_opacity"
+                }
+              ],
+              "mark": {"type": "rule", "strokeCap": "round"},
+              "encoding": {
+                "x": {"field": "x", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "x2": {"field": "x2"},
+                "y": {"field": "y", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "y2": {"field": "y2"},
+                "size": {"field": "line_weight", "type": "quantitative", "scale": {"range": [1.5, 10]}, "legend": null},
+                "color": {"field": "stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "line_style", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "opacity": {"field": "edge_opacity", "type": "quantitative", "legend": null},
+                "tooltip": [
+                  {"field": "label", "type": "nominal", "title": "Transition"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","}
+                ]
+              }
+            },
+
+            // ── highlighted edge lines (edge_path_counts, filtered by path_select) ──
+            {
+              "data": {"name": "data-d285a7403ed98ae579761d64a864032b"},
+              "transform": [
+                {"filter": FILTER},
+                {"filter": {"param": "path_select"}}
+              ],
+              "mark": {"type": "rule", "strokeCap": "round"},
+              "encoding": {
+                "x": {"field": "x", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "x2": {"field": "x2"},
+                "y": {"field": "y", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "y2": {"field": "y2"},
+                "size": {"field": "line_weight", "type": "quantitative", "scale": {"range": [6, 17]}, "legend": null},
+                "color": {"field": "stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "line_style", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "opacity": {"condition": {"test": "datum.count > 0", "value": 1}, "value": 0},
+                "tooltip": [
+                  {"field": "path", "type": "nominal", "title": "Selected path"},
+                  {"field": "label", "type": "nominal", "title": "Transition"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","}
+                ]
+              }
+            },
+
+            // ── background edge labels ───────────────────────────────
+            {
+              "data": {"name": "data-c94b8840898a1e0b627d7187c1a998db"},
+              "transform": [
+                {"filter": FILTER},
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.14 : 0.04) : (datum.count > 0 ? 0.45 : 0.14)`,
+                  "as": "edge_opacity"
+                },
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.3 : 0.12) : (datum.count > 0 ? 1 : 0.45)`,
+                  "as": "edge_label_opacity"
+                }
+              ],
+              "mark": {"type": "text", "fontSize": 15, "fontWeight": "bold", "align": "center", "baseline": "middle"},
+              "encoding": {
+                "x": {"field": "label_x", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "y": {"field": "label_y", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "text": {"field": "label", "type": "nominal"},
+                "color": {"field": "label_color", "type": "nominal", "scale": null, "legend": null},
+                "opacity": {"field": "edge_label_opacity", "type": "quantitative", "legend": null}
+              }
+            },
+
+            // ── highlighted edge labels ──────────────────────────────
+            {
+              "data": {"name": "data-d285a7403ed98ae579761d64a864032b"},
+              "transform": [
+                {"filter": FILTER},
+                {"filter": {"param": "path_select"}}
+              ],
+              "mark": {"type": "text", "fontSize": 15, "fontWeight": "bold", "align": "center", "baseline": "middle"},
+              "encoding": {
+                "x": {"field": "label_x", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "y": {"field": "label_y", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "text": {"field": "label", "type": "nominal"},
+                "color": {"field": "label_color", "type": "nominal", "scale": null, "legend": null},
+                "opacity": {"condition": {"test": "datum.count > 0", "value": 1}, "value": 0}
+              }
+            },
+
+            // ── background node boxes (node_counts) ─────────────────
+            {
+              "data": {"name": "data-e063c824dcd93a651c35a1e853d1a9a2"},
+              "transform": [
+                {"filter": FILTER},
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.18 : 0.06) : (datum.count > 0 ? 0.58 : 0.22)`,
+                  "as": "node_box_opacity"
+                },
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.35 : 0.12) : (datum.count > 0 ? 1 : 0.6)`,
+                  "as": "node_title_opacity"
+                }
+              ],
+              "mark": {"type": "rect", "cornerRadius": 18, "strokeWidth": 1.9},
+              "encoding": {
+                "x": {"field": "x0", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "x2": {"field": "x1"},
+                "y": {"field": "y0", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "y2": {"field": "y1"},
+                "color": {"field": "fill", "type": "nominal", "scale": null, "legend": null},
+                "stroke": {"field": "stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "dash", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "opacity": {"field": "node_box_opacity", "type": "quantitative", "legend": null},
+                "tooltip": [
+                  {"field": "title", "type": "nominal", "title": "Node"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","}
+                ]
+              }
+            },
+
+            // ── highlighted node boxes (node_path_counts) ───────────
+            {
+              "data": {"name": "data-2da615531b26e383fca9f70fd55dd42b"},
+              "transform": [
+                {"filter": FILTER},
+                {"filter": {"param": "path_select"}}
+              ],
+              "mark": {"type": "rect", "cornerRadius": 18, "strokeWidth": 4.2},
+              "encoding": {
+                "x": {"field": "x0", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "x2": {"field": "x1"},
+                "y": {"field": "y0", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "y2": {"field": "y1"},
+                "color": {"value": "#FFF9E8"},
+                "stroke": {"field": "stroke", "type": "nominal", "scale": null, "legend": null},
+                "strokeDash": {"field": "dash", "type": "nominal", "scale": DASH_SCALE, "legend": null},
+                "opacity": {"condition": {"test": "datum.count > 0", "value": 1}, "value": 0},
+                "tooltip": [
+                  {"field": "path", "type": "nominal", "title": "Selected path"},
+                  {"field": "title", "type": "nominal", "title": "Node"},
+                  {"field": "count", "type": "quantitative", "title": "Applicants", "format": ","}
+                ]
+              }
+            },
+
+            // ── background node titles ───────────────────────────────
+            {
+              "data": {"name": "data-e063c824dcd93a651c35a1e853d1a9a2"},
+              "transform": [
+                {"filter": FILTER},
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.18 : 0.06) : (datum.count > 0 ? 0.58 : 0.22)`,
+                  "as": "node_box_opacity"
+                },
+                {
+                  "calculate": `${SEL_ACTIVE} ? (datum.count > 0 ? 0.35 : 0.12) : (datum.count > 0 ? 1 : 0.6)`,
+                  "as": "node_title_opacity"
+                }
+              ],
+              "mark": {"type": "text", "fontSize": 16, "fontWeight": "bold", "color": "#273043", "align": "center", "baseline": "middle"},
+              "encoding": {
+                "x": {"field": "x", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "y": {"field": "y", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "text": {"field": "title", "type": "nominal"},
+                "opacity": {"field": "node_title_opacity", "type": "quantitative", "legend": null}
+              }
+            },
+
+            // ── highlighted node titles ──────────────────────────────
+            {
+              "data": {"name": "data-2da615531b26e383fca9f70fd55dd42b"},
+              "transform": [
+                {"filter": FILTER},
+                {"filter": {"param": "path_select"}}
+              ],
+              "mark": {"type": "text", "fontSize": 16, "fontWeight": "bold", "color": "#111827", "align": "center", "baseline": "middle"},
+              "encoding": {
+                "x": {"field": "x", "type": "quantitative", "scale": {"domain": DOM_X}, "axis": null},
+                "y": {"field": "y", "type": "quantitative", "scale": {"domain": DOM_Y, "reverse": true}, "axis": null},
+                "text": {"field": "title", "type": "nominal"},
+                "opacity": {"condition": {"test": "datum.count > 0", "value": 1}, "value": 0}
+              }
+            }
+
+          ]
+        },
+
+        // right spacer
+        {
+          "data": {"values": [{"x": 0}]},
+          "mark": {"type": "point", "opacity": 0},
+          "encoding": {"x": {"field": "x", "type": "quantitative", "axis": null}},
+          "width": 191,
+          "height": 500
+        }
+      ]
+    }
+
+  ]
+};
+
+// ── Dataset URLs ─────────────────────────────────────────────────────────────
 const datasetUrls = {
-  "data-c94b8840898a1e0b627d7187c1a998db":"interactive_viz_data/data-c94b8840898a1e0b627d7187c1a998db.json",
-  "data-dda4bfef52018bd40ca29976dcbd3eab":"interactive_viz_data/data-dda4bfef52018bd40ca29976dcbd3eab.json",
-  "data-e063c824dcd93a651c35a1e853d1a9a2":"interactive_viz_data/data-e063c824dcd93a651c35a1e853d1a9a2.json",
-  "data-d285a7403ed98ae579761d64a864032b":"interactive_viz_data/data-d285a7403ed98ae579761d64a864032b.json",
-  "data-86a1e9421f0314b075694370406257ab":"interactive_viz_data/data-86a1e9421f0314b075694370406257ab.json",
-  "data-2da615531b26e383fca9f70fd55dd42b":"interactive_viz_data/data-2da615531b26e383fca9f70fd55dd42b.json",
-  "data-7eee8b534bba1831069c790277a6628c":"interactive_viz_data/data-7eee8b534bba1831069c790277a6628c.json",
-  "data-de30ca1fae70b3cc2dcebbf1131f2d22":"interactive_viz_data/data-de30ca1fae70b3cc2dcebbf1131f2d22.json"
+  "data-c94b8840898a1e0b627d7187c1a998db": "interactive_viz_data/data-c94b8840898a1e0b627d7187c1a998db.json",
+  "data-dda4bfef52018bd40ca29976dcbd3eab": "interactive_viz_data/data-dda4bfef52018bd40ca29976dcbd3eab.json",
+  "data-e063c824dcd93a651c35a1e853d1a9a2": "interactive_viz_data/data-e063c824dcd93a651c35a1e853d1a9a2.json",
+  "data-d285a7403ed98ae579761d64a864032b": "interactive_viz_data/data-d285a7403ed98ae579761d64a864032b.json",
+  "data-86a1e9421f0314b075694370406257ab": "interactive_viz_data/data-86a1e9421f0314b075694370406257ab.json",
+  "data-2da615531b26e383fca9f70fd55dd42b": "interactive_viz_data/data-2da615531b26e383fca9f70fd55dd42b.json",
+  "data-7eee8b534bba1831069c790277a6628c": "interactive_viz_data/data-7eee8b534bba1831069c790277a6628c.json",
+  "data-de30ca1fae70b3cc2dcebbf1131f2d22": "interactive_viz_data/data-de30ca1fae70b3cc2dcebbf1131f2d22.json"
 };
 const cacheBust = "1776970204";
 
@@ -157,14 +604,13 @@ Promise.all(
   )
 ).then(entries => {
   spec.datasets = Object.fromEntries(entries);
-  document.getElementById("vis-placeholder") && (document.getElementById("vis-placeholder").style.display = "none");
-  document.getElementById("vis").style.display = "";
   return vegaEmbed("#vis", spec, { mode: "vega-lite", actions: false });
-}).catch(() => {
+}).catch(err => {
   document.getElementById("vis-error").style.display = "block";
-  console.info("Data files not found — visualization will render on GitHub Pages deployment.");
+  console.info("Data files not found — visualization will render once JSON files are present.", err);
 });
 </script>
+
 <footer>
   <div class="footer-inner">
     <section class="credits">
