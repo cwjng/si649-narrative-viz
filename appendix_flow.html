@@ -81,22 +81,16 @@
   <section>
     <div class="sec-label">Section 2</div>
     <h2>Data Sources &amp; Scope</h2>
-    <div class="placeholder-box">
-      <div class="placeholder-icon">&#128203;</div>
-      <div class="placeholder-title">To be completed</div>
-      <div class="placeholder-desc">Details about data sources, year range (2023&ndash;2025), school coverage, and any exclusion criteria will be added here.</div>
-    </div>
+    <p>The source data is an applicant application history export covering the 2023&ndash;2025 academic years. Each row represents a single application instance and includes date fields, status indicators, school and grade assignments, and lottery outcome flags. Date fields were parsed into a consistent datetime format as an initial preprocessing step.</p>
+    <p>Grade labels were standardized to a canonical ordering &mdash; Pre-K, K, and numeric grades 1 through 12 &mdash; with missing or non-standard values grouped under an Unknown category. This normalization ensures consistent behavior across all filter combinations in the visualization.</p>
   </section>
 
   <section>
     <div class="sec-label">Section 3</div>
     <h2>Path Construction</h2>
-    <div class="placeholder-box">
-      <div class="placeholder-icon">&#8644;</div>
-      <div class="placeholder-title">To be completed</div>
-      <div class="placeholder-desc">Documentation of how the sequence of stage flags is encoded into unique path strings, how paths are aggregated by count, and how the top-8 ranking algorithm works will be added here.</div>
-    </div>
-    <p>Each path in the visualization corresponds to a unique combination of binary stage flags representing the applicant&rsquo;s journey. The top 8 paths by applicant volume are shown for any given filter combination.</p>
+    <p>Journey flags were derived from the available status and date indicators in the source data. For each applicant, a binary flag was assigned for each stage &mdash; accepted, registered, enrolled, and attending &mdash; based on whether the relevant indicators were present and logically consistent with prior stages. Lottery outcome determined whether an applicant moved directly from application to acceptance or first passed through a waitlisted state before being accepted.</p>
+    <p>Each applicant was then assigned a full path string representing the sequence of stages they reached, starting from the initial application. These path strings were aggregated to produce counts for every unique journey sequence. The top 8 paths by applicant volume are displayed for any given filter combination. Applicants were also assigned a single terminal outcome label &mdash; such as Enrolled, No Show, Withdrew after Acceptance, or Remained Waitlisted &mdash; to support the final outcomes panel. Node-level and edge-level counts were computed separately to power the flow diagram, capturing both how many applicants reached each stage and how many moved between each pair of adjacent stages.</p>
+    <p>All counts were rolled up by year, school, and grade level, with an &ldquo;All&rdquo; option generated for each dimension to support cross-filter comparisons.</p>
   </section>
 
   <section>
