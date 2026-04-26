@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Description &mdash; NHA Applicant Journey</title>
+<style>
+  :root {
+    --bg:#f7f5ef;--surface:#fffdf8;--surface2:#f0ede6;
+    --border:#d8d2c6;--border2:#c5bfb4;
+    --text:#1f2933;--muted:#4b5b68;--muted2:#8a98a4;
+    --accent:#2c5f8a;--accent-light:#e8f0f7;
+    --c1:#E69F00;--c2:#0072B2;--c3:#009E73;--c4:#D55E00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:Georgia,serif;min-height:100vh;display:flex;flex-direction:column;}
+  nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:56px;}
+  .nav-brand{font-size:1rem;font-weight:bold;color:var(--text);}
+  .nav-brand span{color:var(--accent);font-weight:normal;}
+  .nav-links{display:flex;gap:24px;}
+  .nav-links a{font-size:.8rem;color:var(--muted);text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;}
+  .nav-links a:hover,.nav-links a.active{color:var(--text);}
+  .hero{padding:60px 5% 44px;border-bottom:1px solid var(--border);}
+  .hero-inner{max-width:1100px;margin:0 auto;}
+  .hero-eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  .hero-eyebrow::after{content:'';width:50px;height:1px;background:var(--accent);opacity:.4;}
+  .hero h1{font-size:2.7rem;font-weight:normal;line-height:1.1;margin-bottom:16px;}
+  .hero h1 em{font-style:normal;color:var(--accent);}
+  .hero-desc{font-size:.97rem;line-height:1.7;color:var(--muted);max-width:760px;}
+  .content-section{padding:48px 5%;flex:1;}
+  .content-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+  .section-label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+  .stat-bar{display:flex;flex-direction:column;gap:16px;margin-bottom:40px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;display:flex;align-items:flex-start;gap:16px;}
+  .stat-card-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+  .stat-card-num{font-size:1.85rem;font-weight:normal;color:var(--accent);line-height:1;margin-bottom:4px;}
+  .stat-card-label{font-size:.82rem;color:var(--muted);line-height:1.4;}
+  .dims-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .dims-card-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);}
+  .dims-card-title{font-size:1rem;font-weight:bold;color:var(--text);}
+  .dims-card-sub{font-size:.8rem;color:var(--muted);margin-top:3px;}
+  .dim-item{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;}
+  .dim-item:last-child{border-bottom:none;}
+  .dim-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+  .dim-dot.c1{background:var(--c1);}
+  .dim-dot.c2{background:var(--c2);}
+  .dim-dot.c3{background:var(--c3);}
+  .dim-dot.c4{background:var(--c4);}
+  .dim-dot.c5{background:#CC79A7;}
+  .dim-label{font-size:.88rem;font-weight:bold;color:var(--text);margin-bottom:4px;}
+  .dim-desc{font-size:.82rem;color:var(--muted);line-height:1.55;}
+  .dim-desc em{font-style:italic;color:var(--text);}
+  .pipeline-section{padding:0 5% 48px;}
+  .pipeline-inner{max-width:1100px;margin:0 auto;}
+  .pipeline-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 36px;}
+  .pipeline-title{font-size:1rem;font-weight:bold;margin-bottom:6px;}
+  .pipeline-desc{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:28px;max-width:700px;}
+  .pipeline-stages{display:flex;align-items:center;flex-wrap:wrap;gap:0;}
+  .stage{display:flex;align-items:center;gap:0;}
+  .stage-pill{padding:8px 16px;border-radius:20px;font-size:.76rem;font-weight:bold;letter-spacing:.04em;white-space:nowrap;}
+  .stage-pill.applied{background:rgba(0,114,178,.1);color:var(--c2);border:1px solid rgba(0,114,178,.25);}
+  .stage-pill.waitlisted{background:rgba(230,159,0,.1);color:#b07800;border:1px solid rgba(230,159,0,.3);}
+  .stage-pill.accepted{background:rgba(0,158,115,.1);color:#006e4e;border:1px solid rgba(0,158,115,.3);}
+  .stage-pill.registered{background:rgba(204,121,167,.1);color:#8b3a6e;border:1px solid rgba(204,121,167,.3);}
+  .stage-pill.enrolled{background:rgba(44,95,138,.12);color:var(--accent);border:1px solid rgba(44,95,138,.3);}
+  .stage-pill.post{background:rgba(213,94,0,.08);color:var(--c4);border:1px solid rgba(213,94,0,.2);}
+  .stage-arrow{font-size:.95rem;color:var(--muted2);padding:0 6px;}
+  .stage-group-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);text-align:center;margin-bottom:6px;}
+  .stage-group{display:flex;flex-direction:column;align-items:center;}
+  .post-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+  .post-note{font-size:.75rem;color:var(--muted2);margin-top:8px;}
+  .disclaimer{margin-top:32px;padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--muted2);border-radius:0 6px 6px 0;font-size:.79rem;color:var(--muted);line-height:1.55;}
+  .disclaimer strong{color:var(--text);display:block;margin-bottom:3px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;}
+  footer{padding:26px 5% 28px;border-top:1px solid var(--border);background:var(--surface);}
+  .footer-inner{max-width:1100px;margin:0 auto;}
+  .credits{padding:18px 22px;border:1px solid var(--border);background:var(--bg);border-radius:10px;}
+  .credits-title{margin:0 0 12px;font-size:1rem;font-weight:bold;color:var(--text);}
+  .credits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;margin-bottom:12px;}
+  .credit-name{display:block;font-weight:700;font-size:.87rem;margin-bottom:1px;color:var(--text);}
+  .credit-email{color:var(--muted);font-size:.8rem;}
+  .credits-note{font-size:.79rem;color:var(--muted);line-height:1.5;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">NHA &nbsp;<span>Applicant Journey</span></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="data_desc.html" class="active">Data Description</a>
+    <a href="flow.html">Flow Viz</a>
+    <a href="cluster_index.html">Cluster Viz</a>
+    <a href="appendix_flow.html">Appendix</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Dataset Overview &nbsp;&middot;&nbsp; NHA</div>
+    <h1>Data Description &amp;<br><em>General Structure</em></h1>
+    <p class="hero-desc">The dataset used in this project comes from National Heritage Academies (NHA) and captures the applicant journey across the enrollment flow. The data spans multiple academic years (2023&ndash;2025) and includes over 200,000 applicant records and 60 columns.</p>
+    <div class="disclaimer">
+      <strong>Data Access Statement</strong>
+      Data supporting this analysis cannot be made available due to client confidentiality and NDA restrictions. Code and methodological details are provided to enable replication with comparable data.
+    </div>
+  </div>
+</div>
+
+<div class="content-section">
+  <div class="content-inner">
+
+    <div>
+      <div class="section-label">Dataset at a glance</div>
+      <div class="stat-bar">
+        <div class="stat-card">
+          <div class="stat-card-icon">&#128196;</div>
+          <div>
+            <div class="stat-card-num">200,000+</div>
+            <div class="stat-card-label">Applicant records spanning the 2023&ndash;2025 academic years</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">&#128202;</div>
+          <div>
+            <div class="stat-card-num">60</div>
+            <div class="stat-card-label">Columns capturing applicant, timeline, outcome, family, and school attributes</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">&#128197;</div>
+          <div>
+            <div class="stat-card-num">3</div>
+            <div class="stat-card-label">Academic years covered &mdash; 2023, 2024, and 2025</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Key data dimensions</div>
+      <div class="dims-card">
+        <div class="dims-card-header">
+          <div class="dims-card-title">Record Structure</div>
+          <div class="dims-card-sub">Each row represents one application record</div>
+        </div>
+        <div class="dim-item">
+          <div class="dim-dot c2"></div>
+          <div>
+            <div class="dim-label">Applicant Information</div>
+            <div class="dim-desc">Student identifiers, grade level, and application year.</div>
+          </div>
+        </div>
+        <div class="dim-item">
+          <div class="dim-dot c1"></div>
+          <div>
+            <div class="dim-label">Application Timeline</div>
+            <div class="dim-desc">Key timestamps such as application submission, offer status, and enrollment decision.</div>
+          </div>
+        </div>
+        <div class="dim-item">
+          <div class="dim-dot c3"></div>
+          <div>
+            <div class="dim-label">Enrollment Outcomes</div>
+            <div class="dim-desc">Detailed status indicators capturing each stage of a student&rsquo;s behavior through the enrollment pipeline, including <em>Applied, Waitlisted, Accepted, Registered, Enrolled</em>, and post-enrollment outcomes such as <em>Re-Enrolled, Withdrawn,</em> and <em>Graduated</em>. These statuses reflect both intermediate decision points and final enrollment outcomes, enabling analysis of applicant transitions and drop-off points throughout the process.</div>
+          </div>
+        </div>
+        <div class="dim-item">
+          <div class="dim-dot c4"></div>
+          <div>
+            <div class="dim-label">Family Context</div>
+            <div class="dim-desc">Features such as whether the applicant has siblings currently enrolled.</div>
+          </div>
+        </div>
+        <div class="dim-item">
+          <div class="dim-dot c5"></div>
+          <div>
+            <div class="dim-label">School Attributes</div>
+            <div class="dim-desc">School location and related contextual information.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="pipeline-section">
+  <div class="pipeline-inner">
+    <div class="section-label" style="margin-bottom:14px;">Enrollment pipeline stages</div>
+    <div class="pipeline-card">
+      <div class="pipeline-title">From Application to Outcome</div>
+      <div class="pipeline-desc">Enrollment outcomes track each stage of a student&rsquo;s path through the pipeline. Statuses reflect both intermediate decision points and final outcomes, enabling analysis of where applicants transition or drop off.</div>
+      <div class="section-label" style="margin-bottom:10px;">Core stages</div>
+      <div class="pipeline-stages">
+        <div class="stage-group">
+          <div class="stage-pill applied">Applied</div>
+        </div>
+        <div class="stage-arrow">&#8594;</div>
+        <div class="stage-group">
+          <div class="stage-pill waitlisted">Waitlisted</div>
+        </div>
+        <div class="stage-arrow">&#8594;</div>
+        <div class="stage-group">
+          <div class="stage-pill accepted">Accepted</div>
+        </div>
+        <div class="stage-arrow">&#8594;</div>
+        <div class="stage-group">
+          <div class="stage-pill registered">Registered</div>
+        </div>
+        <div class="stage-arrow">&#8594;</div>
+        <div class="stage-group">
+          <div class="stage-pill enrolled">Enrolled</div>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:22px;margin-bottom:10px;">Post-enrollment outcomes</div>
+      <div class="post-group">
+        <div class="stage-pill post">Re-Enrolled</div>
+        <div class="stage-pill post">Withdrawn</div>
+        <div class="stage-pill post">Graduated</div>
+      </div>
+      <div class="post-note">Post-enrollment statuses reflect outcomes after initial enrollment is confirmed.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <section class="credits">
+      <h2 class="credits-title">Assignment Information</h2>
+      <div class="credits-grid">
+        <div><span class="credit-name">Christina Ng</span><span class="credit-email">cwjng@umich.edu</span></div>
+        <div><span class="credit-name">Adia Lee</span><span class="credit-email">adialee@umich.edu</span></div>
+        <div><span class="credit-name">Selina Shan</span><span class="credit-email">sselina@umich.edu</span></div>
+        <div><span class="credit-name">Shirley Ai</span><span class="credit-email">shirleyi@umich.edu</span></div>
+      </div>
+      <p class="credits-note">Developed in partnership with National Heritage Academies, Inc. (NHA) &middot; University of Michigan School of Information &middot; April 2026</p>
+    </section>
+  </div>
+</footer>
+
+</body>
+</html>
